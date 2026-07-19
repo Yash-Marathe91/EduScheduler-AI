@@ -27,6 +27,13 @@ export default function TimetablePage() {
   const [selectedDept, setSelectedDept] = useState('');
   const [selectedSemester, setSelectedSemester] = useState('sem-mock-id');
   const [schedule, setSchedule] = useState<any[]>([]);
+  const [role, setRole] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setRole(localStorage.getItem("userRole") || "admin");
+    }
+  }, []);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const gridRef = useRef<HTMLDivElement>(null);
@@ -63,7 +70,20 @@ export default function TimetablePage() {
   }, []);
 
   const handleGenerate = () => {
-    refetch();
+    if (!selectedDept || !selectedSemester) return;
+    generateTimetable.mutate({
+      department_id: selectedDept,
+      semester_id: selectedSemester,
+      days: 5,
+      periods_per_day: 6,
+    }, {
+      onSuccess: () => {
+        refetch(); // Refetch the slots after the AI finishes generating and saving them to the DB
+      },
+      onError: (err) => {
+        console.error("Failed to generate timetable:", err);
+      }
+    });
   };
 
   const getSlots = (dayIdx: number, periodIdx: number | string) => {
@@ -134,40 +154,44 @@ export default function TimetablePage() {
               </select>
             </div>
             
-            {/* Premium Generate Button */}
-            <button 
-              onClick={handleGenerate}
-              disabled={isLoading}
-              className="group relative mt-6 w-full flex items-center justify-center gap-2 bg-gradient-to-r from-primary to-primary-fixed-dim hover:to-primary text-on-primary px-4 py-4 rounded-xl font-label-md text-label-md shadow-[0_0_20px_rgba(var(--color-primary),0.3)] disabled:opacity-70 disabled:cursor-not-allowed overflow-hidden transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_10px_30px_rgba(var(--color-primary),0.4)]"
-            >
-              <div className="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 ease-in-out" />
-              {isLoading ? (
-                <>
-                  <Loader2 className="h-5 w-5 animate-spin" />
-                  <span>Synthesizing...</span>
-                </>
-              ) : (
-                <>
-                  <Brain size={18} className="group-hover:scale-110 transition-transform duration-300" />
-                  <span className="tracking-wide font-semibold">Generate Timetable</span>
-                </>
-              )}
-            </button>
+            {role === 'admin' && (
+              <>
+                {/* Premium Generate Button */}
+                <button 
+                  onClick={handleGenerate}
+                  disabled={isLoading || generateTimetable.isPending}
+                  className="group relative mt-6 w-full flex items-center justify-center gap-2 bg-gradient-to-r from-primary to-primary-fixed-dim hover:to-primary text-on-primary px-4 py-4 rounded-xl font-label-md text-label-md shadow-[0_0_20px_rgba(var(--color-primary),0.3)] disabled:opacity-70 disabled:cursor-not-allowed overflow-hidden transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_10px_30px_rgba(var(--color-primary),0.4)]"
+                >
+                  <div className="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 ease-in-out" />
+                  {(isLoading || generateTimetable.isPending) ? (
+                    <>
+                      <Loader2 className="h-5 w-5 animate-spin" />
+                      <span>Synthesizing...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Brain size={18} className="group-hover:scale-110 transition-transform duration-300" />
+                      <span className="tracking-wide font-semibold">Generate Timetable</span>
+                    </>
+                  )}
+                </button>
 
-            <div className="mt-auto pt-md border-t border-outline-variant/30 relative z-10">
-              <p className="font-body-sm text-body-sm text-on-surface-variant mb-sm">AI Insights</p>
-              <div className="bg-gradient-to-br from-surface-container-low to-surface-container/50 p-4 rounded-xl border border-outline-variant/30 shadow-inner group hover:shadow-md transition-all duration-300">
-                <div className="flex items-center gap-2 text-secondary mb-2">
-                  <div className="w-6 h-6 rounded-full bg-secondary/20 flex items-center justify-center">
-                    <Brain size={14} className="group-hover:animate-wiggle" />
+                <div className="mt-auto pt-md border-t border-outline-variant/30 relative z-10">
+                  <p className="font-body-sm text-body-sm text-on-surface-variant mb-sm">AI Insights</p>
+                  <div className="bg-gradient-to-br from-surface-container-low to-surface-container/50 p-4 rounded-xl border border-outline-variant/30 shadow-inner group hover:shadow-md transition-all duration-300">
+                    <div className="flex items-center gap-2 text-secondary mb-2">
+                      <div className="w-6 h-6 rounded-full bg-secondary/20 flex items-center justify-center">
+                        <Brain size={14} className="group-hover:animate-wiggle" />
+                      </div>
+                      <span className="font-label-sm text-label-sm font-semibold">Optimization Active</span>
+                    </div>
+                    <p className="font-body-sm text-body-sm text-on-surface-variant text-xs leading-relaxed">
+                      Room utilization maximized and hard constraints satisfied. Ready for adjustments.
+                    </p>
                   </div>
-                  <span className="font-label-sm text-label-sm font-semibold">Optimization Active</span>
                 </div>
-                <p className="font-body-sm text-body-sm text-on-surface-variant text-xs leading-relaxed">
-                  Room utilization maximized and hard constraints satisfied. Ready for adjustments.
-                </p>
-              </div>
-            </div>
+              </>
+            )}
           </aside>
 
           {/* Calendar Grid (Bento Item) */}

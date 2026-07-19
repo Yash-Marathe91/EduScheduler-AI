@@ -12,7 +12,7 @@ export interface Department {
 export function useDepartments() {
   return useQuery<Department[]>({
     queryKey: ['departments'],
-    queryFn: () => fetchWithAuth('/departments'),
+    queryFn: () => fetchWithAuth('/departments/'),
   });
 }
 
@@ -21,7 +21,7 @@ export function useCreateDepartment() {
   
   return useMutation({
     mutationFn: (newDepartment: Omit<Department, 'id' | 'is_active'>) =>
-      fetchWithAuth('/departments', {
+      fetchWithAuth('/departments/', {
         method: 'POST',
         body: JSON.stringify(newDepartment),
       }),

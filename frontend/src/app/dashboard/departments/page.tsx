@@ -20,6 +20,9 @@ export default function DepartmentsPage() {
       onSuccess: () => {
         setIsSlideOverOpen(false);
         setFormData({ name: '', code: '', description: '' });
+      },
+      onError: (error: any) => {
+        alert(`Failed to add department: ${error.message || 'Unknown error'}`);
       }
     });
   };

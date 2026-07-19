@@ -16,7 +16,7 @@ export interface Faculty {
 export function useFaculty() {
   return useQuery<Faculty[]>({
     queryKey: ['faculty'],
-    queryFn: () => fetchWithAuth('/faculty'),
+    queryFn: () => fetchWithAuth('/faculty/'),
   });
 }
 

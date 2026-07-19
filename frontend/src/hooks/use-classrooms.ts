@@ -12,7 +12,7 @@ export interface Classroom {
 export function useClassrooms() {
   return useQuery<Classroom[]>({
     queryKey: ['classrooms'],
-    queryFn: () => fetchWithAuth('/classrooms'),
+    queryFn: () => fetchWithAuth('/classrooms/'),
   });
 }
 
@@ -21,7 +21,7 @@ export function useCreateClassroom() {
   
   return useMutation({
     mutationFn: (newClassroom: Omit<Classroom, 'id' | 'is_active'>) =>
-      fetchWithAuth('/classrooms', {
+      fetchWithAuth('/classrooms/', {
         method: 'POST',
         body: JSON.stringify(newClassroom),
       }),
