@@ -23,7 +23,10 @@ export async function fetchWithAuth(endpoint: string, options: RequestInit = {})
 
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.detail || `API error: ${response.status}`);
+    const detail = typeof errorData.detail === 'string' 
+      ? errorData.detail 
+      : JSON.stringify(errorData.detail || errorData);
+    throw new Error(detail || `API error: ${response.status}`);
   }
 
   return response.json();

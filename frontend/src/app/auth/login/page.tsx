@@ -7,7 +7,8 @@ import Link from 'next/link';
 import { Mail, Lock, AlertCircle, Loader2 } from 'lucide-react';
 
 export default function LoginPage() {
-  const [role, setRole] = useState<'admin' | 'faculty' | 'student'>('admin');
+  const [role, setRole] = useState<'student' | 'faculty' | 'admin'>('student');
+  const [isRegistering, setIsRegistering] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -16,25 +17,54 @@ export default function LoginPage() {
   const router = useRouter();
   const supabase = createClient();
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
 
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    let authError = null;
 
-    if (error) {
-      setError(error.message);
+    if (isRegistering) {
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            role: role,
+            full_name: email.split('@')[0]
+          }
+        }
+      });
+      authError = error;
+    } else {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      authError = error;
+    }
+
+    if (authError) {
+      console.error("Auth Error Object:", authError);
+      setError(authError.message || JSON.stringify(authError, null, 2));
       setLoading(false);
     } else {
       if (typeof window !== 'undefined') {
         localStorage.setItem('userRole', role);
       }
-      router.push('/dashboard');
-      router.refresh();
+      
+      // If registering as faculty, route to onboarding. Otherwise dashboard.
+      if (isRegistering && role === 'faculty') {
+        router.push('/auth/faculty-onboarding');
+      } else if (isRegistering) {
+        // Wait a moment for trigger to create profile, or redirect to a success page
+        alert("Registration successful! Please sign in if you aren't automatically redirected.");
+        setIsRegistering(false);
+        setLoading(false);
+      } else {
+        router.push('/dashboard');
+        router.refresh();
+      }
     }
   };
 
@@ -66,10 +96,10 @@ export default function LoginPage() {
               <img src="/apple-touch-icon.png" alt="EduScheduler AI Logo" className="w-16 h-16 rounded-2xl shadow-sm object-cover bg-white" />
             </Link>
             <h2 className="font-headline-lg text-3xl sm:text-headline-lg text-on-surface tracking-tight font-bold">
-              Welcome Back
+              {isRegistering ? 'Create Account' : 'Welcome Back'}
             </h2>
             <p className="mt-2 font-body-sm text-body-sm text-on-surface-variant">
-              Sign in to access the SmartSched AI portal
+              {isRegistering ? 'Sign up to access the SmartSched AI portal' : 'Sign in to access the SmartSched AI portal'}
             </p>
           </div>
 
@@ -77,14 +107,14 @@ export default function LoginPage() {
           <div className="flex p-1 space-x-1 bg-surface-container-low rounded-xl border border-outline-variant/50 w-full overflow-x-auto">
             <button
               type="button"
-              onClick={() => setRole('admin')}
+              onClick={() => setRole('student')}
               className={`flex-1 min-w-[80px] py-3 sm:py-2.5 text-xs sm:text-sm font-label-md text-label-md rounded-lg transition-all duration-300 ${
-                role === 'admin'
+                role === 'student'
                   ? 'bg-surface shadow-sm text-primary border border-outline-variant/30'
                   : 'text-on-surface-variant hover:text-on-surface hover:bg-surface/50'
               }`}
             >
-              Admin
+              Student
             </button>
             <button
               type="button"
@@ -99,18 +129,18 @@ export default function LoginPage() {
             </button>
             <button
               type="button"
-              onClick={() => setRole('student')}
+              onClick={() => setRole('admin')}
               className={`flex-1 min-w-[80px] py-3 sm:py-2.5 text-xs sm:text-sm font-label-md text-label-md rounded-lg transition-all duration-300 ${
-                role === 'student'
+                role === 'admin'
                   ? 'bg-surface shadow-sm text-primary border border-outline-variant/30'
                   : 'text-on-surface-variant hover:text-on-surface hover:bg-surface/50'
               }`}
             >
-              Student
+              Admin
             </button>
           </div>
 
-          <form className="mt-8 space-y-6" onSubmit={handleLogin}>
+          <form className="mt-8 space-y-6" onSubmit={handleAuth}>
             {error && (
               <div className="bg-error-container/50 text-on-error-container p-4 rounded-xl font-body-sm text-body-sm border border-error/20 flex items-start gap-3">
                 <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5 text-error" />
@@ -142,9 +172,11 @@ export default function LoginPage() {
                   <label className="block font-label-sm text-label-sm text-on-surface font-medium">
                     Password
                   </label>
-                  <a href="#" className="font-label-sm text-label-sm text-primary hover:text-primary/80 transition-colors">
-                    Forgot password?
-                  </a>
+                  {!isRegistering && (
+                    <a href="#" className="font-label-sm text-label-sm text-primary hover:text-primary/80 transition-colors">
+                      Forgot password?
+                    </a>
+                  )}
                 </div>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-on-surface-variant">
@@ -171,16 +203,29 @@ export default function LoginPage() {
                 {loading ? (
                   <>
                     <Loader2 className="w-5 h-5 animate-spin" />
-                    Authenticating...
+                    {isRegistering ? 'Creating Account...' : 'Authenticating...'}
                   </>
                 ) : (
-                  `Sign In as ${role.charAt(0).toUpperCase() + role.slice(1)}`
+                  isRegistering ? `Register as ${role.charAt(0).toUpperCase() + role.slice(1)}` : `Sign In as ${role.charAt(0).toUpperCase() + role.slice(1)}`
                 )}
               </button>
             </div>
             
+            <div className="text-center mt-4">
+              <p className="text-on-surface-variant text-sm">
+                {isRegistering ? "Already have an account?" : "Don't have an account?"}
+                <button 
+                  type="button"
+                  onClick={() => { setIsRegistering(!isRegistering); setError(null); }}
+                  className="ml-2 text-primary font-medium hover:underline"
+                >
+                  {isRegistering ? "Sign In" : "Register"}
+                </button>
+              </p>
+            </div>
+            
             <p className="text-center font-body-sm text-xs text-on-surface-variant mt-8 px-4">
-              By signing in, you agree to our Terms of Service and Privacy Policy.
+              By {isRegistering ? 'registering' : 'signing in'}, you agree to our Terms of Service and Privacy Policy.
             </p>
           </form>
         </div>
