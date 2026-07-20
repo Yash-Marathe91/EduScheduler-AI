@@ -5,9 +5,8 @@ import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import { PageTransition } from "@/components/layout/page-transition";
 import { 
-  LayoutDashboard, Calendar, Building2, 
-  GraduationCap, Settings, Bell, Moon, User,
-  Home, Sparkles, Search
+  LayoutDashboard, Calendar, Building2, GraduationCap, Settings, Bell, Moon, User,
+  Home, Sparkles, Search, ChevronLeft, ChevronRight
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -18,6 +17,7 @@ export default function DashboardLayout({
 }) {
   const pathname = usePathname();
   const [role, setRole] = useState<string | null>(null);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -32,7 +32,8 @@ export default function DashboardLayout({
     { href: "/dashboard/classrooms", icon: Building2, label: "Classrooms", roles: ["admin"] },
     { href: "/dashboard/subjects", icon: Building2, label: "Subjects", roles: ["admin"] },
     { href: "/dashboard/faculty", icon: GraduationCap, label: "Faculty", roles: ["admin"] },
-    { href: "/dashboard/settings", icon: Settings, label: "Settings", roles: ["admin", "faculty", "student"] },
+    { href: "/dashboard/profile", icon: User, label: "Profile", roles: ["admin", "faculty", "student"] },
+    { href: "/dashboard/settings", icon: Settings, label: "Settings", roles: ["admin"] },
   ];
 
   const navItems = allNavItems.filter(item => !role || item.roles.includes(role));
@@ -40,15 +41,27 @@ export default function DashboardLayout({
   return (
     <div className="flex-1 flex min-h-screen relative w-full overflow-hidden bg-transparent">
       {/* SideNavBar */}
-      <nav className="hidden md:flex flex-col h-screen p-md gap-xs bg-surface/40 backdrop-blur-xl border-r border-outline-variant/30 w-72 flex-shrink-0 z-40 sticky top-0 shadow-[4px_0_24px_rgba(0,0,0,0.02)]">
-        <div className="flex items-center gap-sm mb-lg px-2 pt-2">
-          <img src="/apple-touch-icon.png" alt="EduScheduler AI Logo" className="w-10 h-10 rounded-xl shadow-lg shadow-primary/20 object-cover bg-white" />
-          <div>
-            <h1 className="font-headline-sm text-headline-sm font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary-fixed-dim truncate">
-              EduScheduler
-            </h1>
-            <p className="font-body-sm text-body-sm text-on-surface-variant truncate">AI Intelligence</p>
-          </div>
+      <nav className={cn(
+        "hidden md:flex flex-col h-screen gap-xs bg-surface/40 backdrop-blur-xl border-r border-outline-variant/30 flex-shrink-0 z-40 sticky top-0 shadow-[4px_0_24px_rgba(0,0,0,0.02)] transition-all duration-300 relative",
+        isSidebarCollapsed ? "w-20 p-2" : "w-72 p-md"
+      )}>
+        <button 
+          onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+          className="absolute -right-3 top-6 bg-surface border border-outline-variant/30 rounded-full p-1 shadow-sm text-on-surface-variant hover:text-primary transition-colors z-50"
+        >
+          {isSidebarCollapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
+        </button>
+
+        <div className={cn("flex items-center mb-lg pt-2", isSidebarCollapsed ? "justify-center px-0" : "gap-sm px-2")}>
+          <img src="/apple-touch-icon.png" alt="EduScheduler AI Logo" className="w-10 h-10 rounded-xl shadow-lg shadow-primary/20 object-cover bg-white flex-shrink-0" />
+          {!isSidebarCollapsed && (
+            <div className="overflow-hidden transition-all duration-300">
+              <h1 className="font-headline-sm text-headline-sm font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary-fixed-dim truncate">
+                EduScheduler
+              </h1>
+              <p className="font-body-sm text-body-sm text-on-surface-variant truncate">AI Intelligence</p>
+            </div>
+          )}
         </div>
         
         <div className="flex flex-col gap-1 flex-1 px-2 relative">
@@ -59,11 +72,13 @@ export default function DashboardLayout({
                 key={item.href}
                 href={item.href} 
                 className={cn(
-                  "group relative flex items-center gap-sm p-3 rounded-xl transition-all duration-300 ease-out",
+                  "group relative flex items-center rounded-xl transition-all duration-300 ease-out",
+                  isSidebarCollapsed ? "p-3 justify-center" : "gap-sm p-3",
                   isActive 
                     ? "text-primary font-medium" 
                     : "text-on-surface-variant hover:text-on-surface hover:bg-surface-container/50"
                 )}
+                title={isSidebarCollapsed ? item.label : undefined}
               >
                 {isActive && (
                   <div className="absolute inset-0 bg-primary/10 rounded-xl -z-10" />
@@ -74,11 +89,16 @@ export default function DashboardLayout({
                 <item.icon 
                   size={20} 
                   className={cn(
-                    "transition-transform duration-300 ease-out group-hover:scale-110",
+                    "transition-transform duration-300 ease-out flex-shrink-0",
+                    !isSidebarCollapsed && "group-hover:scale-110",
                     isActive ? "text-primary" : "opacity-80"
                   )} 
                 />
-                <span className="font-label-md text-label-md tracking-wide">{item.label}</span>
+                {!isSidebarCollapsed && (
+                  <span className="font-label-md text-label-md tracking-wide truncate overflow-hidden transition-all duration-300">
+                    {item.label}
+                  </span>
+                )}
               </Link>
             );
           })}
@@ -86,11 +106,17 @@ export default function DashboardLayout({
         
         {(!role || role === 'admin') && (
           <div className="px-2 pb-4">
-            <button className="group relative w-full overflow-hidden bg-primary text-on-primary py-3 px-4 rounded-xl font-label-md text-label-md transition-all duration-300 hover:shadow-[0_0_20px_rgba(var(--color-primary),0.3)] hover:-translate-y-0.5 active:translate-y-0">
+            <button 
+              className={cn(
+                "group relative overflow-hidden bg-primary text-on-primary rounded-xl font-label-md text-label-md transition-all duration-300 hover:shadow-[0_0_20px_rgba(var(--color-primary),0.3)] hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center",
+                isSidebarCollapsed ? "w-12 h-12 mx-auto" : "w-full py-3 px-4"
+              )}
+              title={isSidebarCollapsed ? "New Schedule" : undefined}
+            >
               <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]" />
               <span className="relative flex items-center justify-center gap-2">
-                <Sparkles size={18} className="group-hover:rotate-12 transition-transform duration-300" />
-                New Schedule
+                <Sparkles size={18} className={cn("transition-transform duration-300", !isSidebarCollapsed && "group-hover:rotate-12")} />
+                {!isSidebarCollapsed && <span className="truncate">New Schedule</span>}
               </span>
             </button>
           </div>
@@ -125,9 +151,9 @@ export default function DashboardLayout({
             <button className="group text-on-surface-variant hover:text-primary transition-all duration-300 hover:bg-primary/10 w-10 h-10 rounded-full flex items-center justify-center">
               <Moon size={20} className="group-hover:-rotate-12" />
             </button>
-            <div className="w-10 h-10 rounded-full border-2 border-primary/20 bg-gradient-to-br from-surface-container to-surface-container-high flex items-center justify-center overflow-hidden hover:border-primary transition-colors cursor-pointer ml-2 shadow-sm">
+            <Link href="/dashboard/profile" className="w-10 h-10 rounded-full border-2 border-primary/20 bg-gradient-to-br from-surface-container to-surface-container-high flex items-center justify-center overflow-hidden hover:border-primary transition-colors cursor-pointer ml-2 shadow-sm">
               <User size={18} className="text-primary" />
-            </div>
+            </Link>
           </div>
         </header>
         

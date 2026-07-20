@@ -3,7 +3,8 @@
 import { Loader2, Filter, Share, Sparkles, Brain, MapPin, Plus, Calendar as CalendarIcon } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { useDepartments } from '@/hooks/use-departments';
-import { useGenerateTimetable, useTimetableSlots } from '@/hooks/use-timetable';
+import { useSemesters, Semester } from '@/hooks/use-semesters';
+import { useGenerateTimetable, useTimetableSlots, useUpdateTimetableSlot } from '@/hooks/use-timetable';
 import gsap from 'gsap';
 import { cn } from '@/lib/utils';
 
@@ -21,13 +22,18 @@ const PERIODS = [
 
 export default function TimetablePage() {
   const { data: departments } = useDepartments();
+  const { data: semesters } = useSemesters();
   const generateTimetable = useGenerateTimetable();
   const { data: slotsData, isLoading, refetch } = useTimetableSlots();
+  const updateSlot = useUpdateTimetableSlot();
   
   const [selectedDept, setSelectedDept] = useState('');
-  const [selectedSemester, setSelectedSemester] = useState('sem-mock-id');
+  const [selectedSemester, setSelectedSemester] = useState('');
   const [schedule, setSchedule] = useState<any[]>([]);
   const [role, setRole] = useState<string | null>(null);
+  
+  // Drag and Drop state
+  const [dragError, setDragError] = useState<string | null>(null);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -86,9 +92,65 @@ export default function TimetablePage() {
     });
   };
 
+  const handleDragStart = (e: React.DragEvent, slotId: string) => {
+    e.dataTransfer.setData('text/plain', slotId);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleDrop = (e: React.DragEvent, dayOfWeek: number, startTime: number) => {
+    e.preventDefault();
+    const slotId = e.dataTransfer.getData('text/plain');
+    if (!slotId) return;
+
+    setDragError(null);
+
+    // Optimistic update in UI
+    const originalSchedule = [...schedule];
+    const updatedSchedule = schedule.map(slot => {
+      if (slot.id === slotId) {
+        return { ...slot, day_of_week: dayOfWeek, start_time: startTime };
+      }
+      return slot;
+    });
+    setSchedule(updatedSchedule);
+
+    updateSlot.mutate(
+      { slotId, dayOfWeek, startTime },
+      {
+        onSuccess: () => {
+          refetch();
+        },
+        onError: (err: any) => {
+          console.error("Conflict Error:", err);
+          // Revert on failure
+          setSchedule(originalSchedule);
+          setDragError(err.message || 'Conflict: Unable to move lecture.');
+          setTimeout(() => setDragError(null), 4000);
+        }
+      }
+    );
+  };
+
   const getSlots = (dayIdx: number, periodIdx: number | string) => {
     if (typeof periodIdx === 'string') return [];
-    return schedule.filter(s => s.day_of_week === dayIdx && s.start_time === periodIdx);
+    const daySlots = schedule.filter(s => s.day_of_week === dayIdx && s.start_time === periodIdx);
+    
+    const mergedSlots: any[] = [];
+    const lectureGroups = new Map();
+    
+    for (const slot of daySlots) {
+      if (slot.is_lab) {
+        mergedSlots.push(slot);
+      } else {
+        const key = `${slot.subject_code}-${slot.faculty_name}-${slot.classroom_name}`;
+        if (!lectureGroups.has(key)) {
+          lectureGroups.set(key, slot);
+          mergedSlots.push(slot);
+        }
+      }
+    }
+    
+    return mergedSlots;
   };
 
   return (
@@ -118,8 +180,14 @@ export default function TimetablePage() {
         </div>
 
         {/* Main Bento Layout */}
-        <div className="flex flex-col xl:flex-row gap-lg flex-1 min-h-[800px]">
+        <div className="flex flex-col xl:flex-row gap-lg flex-1 min-h-[800px] relative">
           
+          {dragError && (
+            <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 bg-red-500/90 text-white px-6 py-3 rounded-full shadow-lg backdrop-blur-md flex items-center gap-2 animate-fade-in font-label-md">
+              <span>{dragError}</span>
+            </div>
+          )}
+
           {/* Filters Sidebar */}
           <aside className="animate-stagger-in xl:w-80 flex-shrink-0 bg-surface/60 backdrop-blur-xl border border-outline-variant/30 rounded-2xl p-md flex flex-col gap-md shadow-[0_8px_30px_rgb(0,0,0,0.04)] h-full overflow-hidden relative">
             <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl -z-10 translate-x-1/2 -translate-y-1/2" />
@@ -149,8 +217,12 @@ export default function TimetablePage() {
                 className="w-full bg-surface-container-lowest/80 border border-outline-variant/50 rounded-xl p-3 font-body-sm text-body-sm text-on-surface focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all duration-300 hover:border-primary/50 shadow-sm"
                 value={selectedSemester}
                 onChange={(e) => setSelectedSemester(e.target.value)}
+                disabled={!selectedDept}
               >
-                <option value="sem-mock-id">TY ECE (Third Year)</option>
+                <option value="" disabled>Select Semester</option>
+                {semesters?.filter((s: Semester) => s.department_id === selectedDept).map((s: Semester) => (
+                  <option key={s.id} value={s.id}>{s.name}</option>
+                ))}
               </select>
             </div>
             
@@ -245,8 +317,8 @@ export default function TimetablePage() {
                     }
 
                     return (
-                      <tr key={period.id} className="group/row flex w-full border-b border-outline-variant/20 last:border-0 min-h-[160px] hover:bg-surface-container-lowest/50 transition-colors">
-                        <td className="py-3 px-2 text-center bg-surface-container-lowest/80 border-r border-outline-variant/30 w-[110px] flex-shrink-0 flex items-center justify-center">
+                      <tr key={period.id} className="group/row flex w-full border-b border-outline-variant/20 last:border-0 min-h-[90px] hover:bg-surface-container-lowest/50 transition-colors">
+                        <td className="py-1.5 px-2 text-center bg-surface-container-lowest/80 border-r border-outline-variant/30 w-[110px] flex-shrink-0 flex items-center justify-center">
                           <span className="font-label-sm text-label-sm text-on-surface-variant font-medium">{period.time}</span>
                         </td>
                         
@@ -254,32 +326,43 @@ export default function TimetablePage() {
                           const slots = getSlots(dayIdx, period.id);
                           
                           return (
-                            <td key={`${day}-${period.id}`} className="p-2 border-r border-outline-variant/20 last:border-0 flex-1 relative bg-transparent">
+                            <td 
+                              key={`${day}-${period.id}`} 
+                              className="p-1 border-r border-outline-variant/20 last:border-0 flex-1 relative bg-transparent group/dropzone transition-colors hover:bg-primary/5"
+                              onDragOver={(e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; }}
+                              onDrop={(e) => handleDrop(e, dayIdx, period.id as number)}
+                            >
                               {slots.length > 0 ? (
-                                <div className={`grid gap-2 w-full h-full ${slots.length > 1 ? 'grid-cols-2 grid-rows-2' : 'grid-cols-1'}`}>
+                                <div className="flex flex-col gap-1 w-full h-full min-h-[70px]">
                                   {slots.map((slot) => (
-                                    <div key={slot.id} className={`timetable-slot rounded-xl p-3 border transition-all duration-300 hover:shadow-[0_10px_20px_rgba(0,0,0,0.08)] hover:-translate-y-1 hover:scale-[1.02] cursor-grab active:cursor-grabbing active:scale-95 group/card flex flex-col justify-between overflow-hidden relative ${
+                                    <div 
+                                      key={slot.id} 
+                                      draggable
+                                      onDragStart={(e) => handleDragStart(e, slot.id)}
+                                      className={`timetable-slot rounded-lg p-1.5 border transition-all duration-300 hover:shadow-[0_10px_20px_rgba(0,0,0,0.08)] hover:-translate-y-1 hover:scale-[1.02] cursor-grab active:cursor-grabbing active:scale-95 group/card flex flex-col justify-between overflow-hidden relative flex-1 ${
                                       slot.is_lab 
                                         ? 'bg-secondary-container/90 backdrop-blur text-on-secondary-container border-secondary/20 hover:border-secondary/50' 
                                         : 'bg-primary/95 backdrop-blur text-on-primary border-primary/20 hover:border-primary/50 shadow-[0_4px_10px_rgba(var(--color-primary),0.1)]'
                                     }`}>
-                                      <div className="flex justify-between items-start mb-2 gap-1 relative z-10">
-                                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded shadow-sm border truncate max-w-[50%] transition-colors duration-300 ${
-                                           slot.is_lab ? 'bg-secondary/10 border-secondary/20 group-hover/card:bg-secondary/20' : 'bg-on-primary/10 border-on-primary/20 group-hover/card:bg-on-primary/20'
-                                        }`}>
-                                          {slot.batch_name}
-                                        </span>
-                                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded truncate max-w-[50%] flex items-center gap-1 transition-colors duration-300 ${
+                                      <div className="flex justify-between items-start w-full gap-1 relative z-10">
+                                        {slot.is_lab ? (
+                                          <span className="text-[9px] font-bold px-1.5 py-0.5 rounded shadow-sm border truncate max-w-[50%] transition-colors duration-300 bg-secondary/10 border-secondary/20 group-hover/card:bg-secondary/20">
+                                            {slot.batch_name}
+                                          </span>
+                                        ) : (
+                                          <div className="max-w-[50%]"></div>
+                                        )}
+                                        <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded truncate max-w-[50%] flex items-center gap-1 transition-colors duration-300 ${
                                           slot.is_lab ? 'bg-secondary/10 group-hover/card:bg-secondary/20' : 'bg-on-primary/10 group-hover/card:bg-on-primary/20'
                                         }`}>
-                                          <MapPin size={10} />
+                                          <MapPin size={9} />
                                           {slot.classroom_name}
                                         </span>
                                       </div>
-                                      <div className="font-headline-sm text-headline-sm font-bold leading-tight mt-1 truncate relative z-10" title={slot.subject_code}>
+                                      <div className="font-label-lg text-label-lg font-bold leading-tight truncate relative z-10" title={slot.subject_code}>
                                         {slot.subject_code}
                                       </div>
-                                      <div className="font-body-sm text-xs opacity-90 truncate mt-2 relative z-10 font-medium">
+                                      <div className="font-body-xs text-[10px] opacity-90 truncate relative z-10 font-medium">
                                         {slot.faculty_name}
                                       </div>
                                       
@@ -291,9 +374,9 @@ export default function TimetablePage() {
                                   ))}
                                 </div>
                               ) : (
-                                <div className="h-full w-full min-h-[120px] rounded-xl border border-dashed border-outline-variant/30 hover:border-primary/40 bg-transparent hover:bg-primary/5 flex items-center justify-center opacity-0 hover:opacity-100 transition-all duration-300 cursor-pointer group/add">
-                                  <div className="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center text-outline-variant group-hover/add:bg-primary/10 group-hover/add:text-primary transition-colors">
-                                    <Plus size={16} />
+                                <div className="h-full w-full min-h-[70px] rounded-lg border border-dashed border-outline-variant/30 hover:border-primary/40 bg-transparent hover:bg-primary/5 flex items-center justify-center opacity-0 hover:opacity-100 transition-all duration-300 cursor-pointer group/add">
+                                  <div className="w-6 h-6 rounded-full bg-surface-container flex items-center justify-center text-outline-variant group-hover/add:bg-primary/10 group-hover/add:text-primary transition-colors">
+                                    <Plus size={14} />
                                   </div>
                                 </div>
                               )}

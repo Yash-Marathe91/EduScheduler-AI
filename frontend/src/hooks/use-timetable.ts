@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { fetchWithAuth } from '@/lib/api-client';
 
 export interface TimetableSlot {
@@ -39,5 +39,23 @@ export function useTimetableSlots() {
   return useQuery({
     queryKey: ['timetable_slots'],
     queryFn: () => fetchWithAuth('/timetable/slots'),
+  });
+}
+
+export function useUpdateTimetableSlot() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ slotId, dayOfWeek, startTime }: { slotId: string, dayOfWeek: number, startTime: number }) =>
+      fetchWithAuth(`/timetable/slots/${slotId}`, {
+        method: 'PUT',
+        body: JSON.stringify({
+          day_of_week: dayOfWeek,
+          start_time: startTime
+        })
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['timetable_slots'] });
+    }
   });
 }

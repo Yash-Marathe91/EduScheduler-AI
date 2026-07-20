@@ -7,11 +7,16 @@ import uuid
 from app.db.database import get_db
 from app.core.security import verify_token
 from app.models.domain import Semester, Batch, TimetableSlot, Subject, Faculty, Classroom
+from pydantic import BaseModel
 from app.schemas.timetable import (
     SemesterCreate, SemesterResponse,
     BatchCreate, BatchResponse,
     GenerateTimetableRequest, TimetableSlotResponse
 )
+
+class SlotUpdateRequest(BaseModel):
+    day_of_week: int
+    start_time: int
 from app.services.scheduler_engine import TimetableScheduler
 
 router = APIRouter(prefix="/timetable", tags=["Timetable"])
@@ -201,3 +206,49 @@ async def get_timetable_slots(
         })
         
     return {"schedule": schedule}
+
+@router.put("/slots/{slot_id}")
+async def update_timetable_slot(
+    slot_id: uuid.UUID,
+    request: SlotUpdateRequest,
+    db: AsyncSession = Depends(get_db),
+    user: dict = Depends(verify_token)
+):
+    # 1. Fetch the slot
+    slot_result = await db.execute(select(TimetableSlot).filter(TimetableSlot.id == slot_id))
+    slot = slot_result.scalar_one_or_none()
+    
+    if not slot:
+        raise HTTPException(status_code=404, detail="Slot not found")
+        
+    # 2. Conflict checking
+    # Faculty Conflict
+    faculty_conflict = await db.execute(
+        select(TimetableSlot).filter(
+            TimetableSlot.faculty_id == slot.faculty_id,
+            TimetableSlot.day_of_week == request.day_of_week,
+            TimetableSlot.start_time == request.start_time,
+            TimetableSlot.id != slot_id
+        )
+    )
+    if faculty_conflict.scalar_one_or_none():
+        raise HTTPException(status_code=409, detail="Conflict: Faculty is already assigned to a lecture at this time.")
+        
+    # Classroom Conflict
+    room_conflict = await db.execute(
+        select(TimetableSlot).filter(
+            TimetableSlot.classroom_id == slot.classroom_id,
+            TimetableSlot.day_of_week == request.day_of_week,
+            TimetableSlot.start_time == request.start_time,
+            TimetableSlot.id != slot_id
+        )
+    )
+    if room_conflict.scalar_one_or_none():
+        raise HTTPException(status_code=409, detail="Conflict: Classroom is already booked at this time.")
+
+    # 3. Update the slot
+    slot.day_of_week = request.day_of_week
+    slot.start_time = request.start_time
+    await db.commit()
+    
+    return {"status": "success", "message": "Slot updated successfully."}

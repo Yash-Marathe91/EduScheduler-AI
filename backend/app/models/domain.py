@@ -85,3 +85,41 @@ class TimetableSlot(Base):
     duration_minutes = Column(Integer, default=60)
     
     is_lab = Column(Boolean, default=False)
+    
+class Profile(Base):
+    __tablename__ = "profiles"
+
+    id = Column(UUID(as_uuid=True), primary_key=True) # Matches auth.users.id
+    email = Column(String(255), unique=True, nullable=False)
+    full_name = Column(String(255), nullable=True)
+    role = Column(String(50), default="student")
+    
+class FacultyDetails(Base):
+    __tablename__ = "faculty_details"
+
+    id = Column(UUID(as_uuid=True), primary_key=True) # Matches profiles.id
+    department_id = Column(UUID(as_uuid=True), ForeignKey("departments.id"), nullable=True)
+    designation = Column(String(100), nullable=True)
+    employee_id = Column(String(50), nullable=True)
+    id_card_url = Column(String(255), nullable=True)
+    is_verified = Column(Boolean, default=False)
+    
+class StudentDetails(Base):
+    __tablename__ = "student_details"
+
+    id = Column(UUID(as_uuid=True), primary_key=True) # Matches profiles.id
+    enrollment_number = Column(String(50), unique=True, nullable=True)
+    batch_id = Column(UUID(as_uuid=True), ForeignKey("batches.id"), nullable=True)
+    current_semester_id = Column(UUID(as_uuid=True), ForeignKey("semesters.id"), nullable=True)
+    phone = Column(String(20), nullable=True)
+
+class TimetableSettings(Base):
+    __tablename__ = "timetable_settings"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    department_id = Column(UUID(as_uuid=True), ForeignKey("departments.id"), unique=True)
+    max_consecutive_lectures = Column(Integer, default=3)
+    lunch_break_start = Column(Integer, default=750) # 12:30 PM in minutes
+    lunch_break_duration = Column(Integer, default=60)
+    allow_saturday_classes = Column(Boolean, default=False)
+
