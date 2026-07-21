@@ -14,5 +14,29 @@ async def run():
         );
     ''')
     print("Created student_details table.")
+    
+    # Create faculty_absences table
+    await conn.execute('''
+        CREATE TABLE IF NOT EXISTS public.faculty_absences (
+            id UUID PRIMARY KEY,
+            faculty_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE,
+            absence_date VARCHAR(20) NOT NULL,
+            reason TEXT,
+            status VARCHAR(20) DEFAULT 'pending'
+        );
+    ''')
+    print("Created faculty_absences table.")
+    
+    # Create substitute_assignments table
+    await conn.execute('''
+        CREATE TABLE IF NOT EXISTS public.substitute_assignments (
+            id UUID PRIMARY KEY,
+            absence_id UUID REFERENCES public.faculty_absences(id) ON DELETE CASCADE,
+            original_slot_id UUID REFERENCES public.timetable_slots(id) ON DELETE CASCADE,
+            substitute_faculty_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE,
+            status VARCHAR(20) DEFAULT 'assigned'
+        );
+    ''')
+    print("Created substitute_assignments table.")
 
 asyncio.run(run())

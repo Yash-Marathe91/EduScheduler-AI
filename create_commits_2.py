@@ -39,6 +39,28 @@ def main():
     commit_batch(["frontend/src/app/dashboard/classrooms", "frontend/src/app/dashboard/faculty", "frontend/src/app/dashboard/departments", "frontend/src/app/dashboard/subjects"], "feat(frontend): Add entity management dashboards for Classrooms and Faculty")
     
     # 12
+    commit_batch([
+        "backend/app/api/endpoints/attendance.py",
+        "backend/app/services/ocr_service.py",
+        "backend/create_attendance_table.py",
+        "frontend/src/app/dashboard/attendance"
+    ], "feat(ai): Implement Gemini Vision OCR for automated attendance extraction")
+    
+    # 13
+    commit_batch([
+        "backend/app/api/endpoints/notifications.py",
+        "backend/create_notifications_table.py",
+        "frontend/src/components/notifications",
+        "frontend/src/app/dashboard/layout.tsx",
+        "backend/app/services/tools.py"
+    ], "feat(core): Integrate real-time notification subsystem for absent alerts and substitutions")
+
+    # 14
+    commit_batch([
+        "backend/app/api/timetable.py"
+    ], "feat(export): Add CSV export capabilities for timetables and attendance records")
+
+    # 15
     subprocess.run(["git", "add", "."])
     commit_batch(["."], "docs: Finalize production environment, advanced SQL schemas, and root configs")
 

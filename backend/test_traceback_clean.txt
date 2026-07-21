@@ -1,0 +1,11 @@
+﻿ERROR OCCURRED:
+Traceback (most recent call last):
+  File "C:\Users\mhyas\AppData\Local\Programs\Python\Python311\Lib\site-packages\langchain_google_genai\chat_models.py", line 3343, in _agenerate
+    await self.client.aio.models.generate_content(
+  File "C:\Users\mhyas\AppData\Local\Programs\Python\Python311\Lib\site-packages\google\genai\models.py", line 8711, in generate_content
+    return await self._generate_content(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\mhyas\AppData\Local\Programs\Python\Python311\Lib\site-packages\google\genai\models.py", line 7185, in _generate_content
+    response = await self._api_client.async_request(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\mhyas\AppData\Local\Programs\Python\Python311\Lib\site-packages\google\

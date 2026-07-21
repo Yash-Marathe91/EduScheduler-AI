@@ -36,7 +36,7 @@ async def get_my_profile(
         "student_details": None
     }
 
-    if profile.role == 'faculty':
+    if profile.role in ['faculty', 'admin']:
         fac_result = await db.execute(select(FacultyDetails).filter(FacultyDetails.id == user_id))
         fac_details = fac_result.scalar_one_or_none()
         if fac_details:
@@ -76,8 +76,11 @@ async def update_my_profile(
     if profile_update.full_name is not None:
         profile.full_name = profile_update.full_name
         
-    # Handle Faculty Details
-    if profile.role == 'faculty' and profile_update.faculty_details:
+    if profile_update.role is not None:
+        profile.role = profile_update.role
+        
+    # Handle Faculty/Admin Details
+    if profile.role in ['faculty', 'admin'] and profile_update.faculty_details:
         fac_result = await db.execute(select(FacultyDetails).filter(FacultyDetails.id == user_id))
         fac_details = fac_result.scalar_one_or_none()
         if not fac_details:

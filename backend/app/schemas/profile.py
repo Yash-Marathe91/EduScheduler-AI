@@ -27,5 +27,6 @@ class ProfileResponse(BaseModel):
 
 class ProfileUpdate(BaseModel):
     full_name: Optional[str] = None
+    role: Optional[str] = None
     faculty_details: Optional[FacultyDetailsSchema] = None
     student_details: Optional[StudentDetailsSchema] = None

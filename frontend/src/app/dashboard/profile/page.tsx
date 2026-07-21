@@ -23,6 +23,11 @@ export default function ProfilePage() {
   const [phone, setPhone] = useState('');
   
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+  const [localRole, setLocalRole] = useState<string>('student');
+
+  useEffect(() => {
+    setLocalRole(localStorage.getItem('userRole') || 'student');
+  }, []);
 
   useEffect(() => {
     if (profile) {
@@ -56,15 +61,15 @@ export default function ProfilePage() {
   const handleSaveProfile = async () => {
     setSaveStatus('saving');
     try {
-      const payload: any = { full_name: fullName };
+      const payload: any = { full_name: fullName, role: localRole };
       
-      if (profile?.role === 'faculty' || profile?.role === 'admin') {
+      if (localRole === 'faculty' || localRole === 'admin') {
         payload.faculty_details = {
           designation,
           department_id: departmentId || null,
           employee_id: employeeId
         };
-      } else if (profile?.role === 'student') {
+      } else if (localRole === 'student') {
         payload.student_details = {
           enrollment_number: enrollmentNumber,
           phone
@@ -118,7 +123,7 @@ export default function ProfilePage() {
                <div>
                   <h2 className="font-headline-md text-headline-md font-semibold">{fullName || 'Unknown User'}</h2>
                   <div className="px-3 py-1 rounded-full bg-primary/10 text-primary font-label-sm text-label-sm inline-flex capitalize border border-primary/20 shadow-sm mt-2 font-semibold tracking-wide">
-                    {profile?.role || 'User'} Role
+                    {localRole === 'faculty' ? 'Staff' : localRole} Role
                   </div>
                </div>
             </div>
@@ -146,13 +151,15 @@ export default function ProfilePage() {
           </div>
 
           {/* FACULTY / ADMIN SPECIFIC DETAILS */}
-          {(profile?.role === 'faculty' || profile?.role === 'admin') && (
+          {(localRole === 'faculty' || localRole === 'admin') && (
             <div className="profile-card bg-surface/60 backdrop-blur-xl border border-outline-variant/30 rounded-3xl p-xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col gap-md relative overflow-hidden">
                 <div className="flex items-center gap-3 mb-2">
                     <div className="w-10 h-10 rounded-xl bg-secondary/10 flex items-center justify-center text-secondary">
                         <Briefcase size={20} />
                     </div>
-                    <h2 className="font-headline-sm text-headline-sm font-semibold">Faculty Information</h2>
+                    <h2 className="font-headline-sm text-headline-sm font-semibold">
+                      {localRole === 'admin' ? 'Admin / Staff Information' : 'Staff Information'}
+                    </h2>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -202,7 +209,7 @@ export default function ProfilePage() {
           )}
 
           {/* STUDENT SPECIFIC DETAILS */}
-          {profile?.role === 'student' && (
+          {localRole === 'student' && (
             <div className="profile-card bg-surface/60 backdrop-blur-xl border border-outline-variant/30 rounded-3xl p-xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col gap-md relative overflow-hidden">
                 <div className="flex items-center gap-3 mb-2">
                     <div className="w-10 h-10 rounded-xl bg-tertiary/10 flex items-center justify-center text-tertiary">

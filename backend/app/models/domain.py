@@ -123,3 +123,42 @@ class TimetableSettings(Base):
     lunch_break_duration = Column(Integer, default=60)
     allow_saturday_classes = Column(Boolean, default=False)
 
+class FacultyAbsence(Base):
+    __tablename__ = "faculty_absences"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    faculty_id = Column(UUID(as_uuid=True), ForeignKey("profiles.id"), nullable=False)
+    absence_date = Column(String(20), nullable=False) # ISO format date
+    reason = Column(Text, nullable=True)
+    status = Column(String(20), default="pending") # pending, covered, cancelled
+
+class SubstituteAssignment(Base):
+    __tablename__ = "substitute_assignments"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    absence_id = Column(UUID(as_uuid=True), ForeignKey("faculty_absences.id"), nullable=False)
+    original_slot_id = Column(UUID(as_uuid=True), ForeignKey("timetable_slots.id"), nullable=False)
+    substitute_faculty_id = Column(UUID(as_uuid=True), ForeignKey("profiles.id"), nullable=False)
+    status = Column(String(20), default="assigned") # assigned, notified, accepted, rejected
+
+class AttendanceRecord(Base):
+    __tablename__ = "attendance_records"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    timetable_slot_id = Column(UUID(as_uuid=True), ForeignKey("timetable_slots.id"), nullable=False)
+    date = Column(String(20), nullable=False) # ISO format date
+    student_enrollment = Column(String(50), nullable=False) # Student enrollment number
+    status = Column(String(20), nullable=False) # present, absent, late
+    marked_by = Column(UUID(as_uuid=True), ForeignKey("profiles.id"), nullable=True) # Faculty who uploaded the sheet
+    confidence_score = Column(String(20), nullable=True) # OCR confidence score if extracted via AI
+
+class Notification(Base):
+    __tablename__ = "notifications"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("profiles.id"), nullable=False)
+    title = Column(String(100), nullable=False)
+    message = Column(Text, nullable=False)
+    type = Column(String(50), default="info") # info, warning, alert, success
+    is_read = Column(Boolean, default=False)
+    created_at = Column(String(30), nullable=True) # ISO format datetime
