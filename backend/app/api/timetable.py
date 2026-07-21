@@ -1,8 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.responses import StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from typing import List, Any
 import uuid
+import io
+import csv
 
 from app.db.database import get_db
 from app.core.security import verify_token
@@ -252,3 +255,49 @@ async def update_timetable_slot(
     await db.commit()
     
     return {"status": "success", "message": "Slot updated successfully."}
+
+@router.get("/export")
+async def export_timetable_csv(db: AsyncSession = Depends(get_db)):
+    """Exports the entire timetable to a CSV file."""
+    try:
+        from sqlalchemy.orm import selectinload
+        query = select(
+            TimetableSlot, Batch, Subject, Faculty, Classroom
+        ).join(Batch, TimetableSlot.batch_id == Batch.id)\
+         .join(Subject, TimetableSlot.subject_id == Subject.id)\
+         .join(Faculty, TimetableSlot.faculty_id == Faculty.id)\
+         .join(Classroom, TimetableSlot.classroom_id == Classroom.id)
+         
+        result = await db.execute(query)
+        rows = result.all()
+        
+        output = io.StringIO()
+        writer = csv.writer(output)
+        writer.writerow(["Batch", "Subject", "Faculty", "Classroom", "Day", "Start Time", "Duration (mins)", "Type"])
+        
+        days_map = {0: "Monday", 1: "Tuesday", 2: "Wednesday", 3: "Thursday", 4: "Friday", 5: "Saturday", 6: "Sunday"}
+        
+        for slot, batch, subject, faculty, classroom in rows:
+            time_str = f"{slot.start_time // 60:02d}:{slot.start_time % 60:02d}"
+            day_name = days_map.get(slot.day_of_week, "Unknown")
+            type_str = "Lab" if slot.is_lab else "Lecture"
+            
+            writer.writerow([
+                batch.name, 
+                subject.name, 
+                f"{faculty.first_name} {faculty.last_name}", 
+                classroom.name, 
+                day_name, 
+                time_str, 
+                slot.duration_minutes, 
+                type_str
+            ])
+            
+        output.seek(0)
+        return StreamingResponse(
+            iter([output.getvalue()]), 
+            media_type="text/csv",
+            headers={"Content-Disposition": "attachment; filename=timetable.csv"}
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
