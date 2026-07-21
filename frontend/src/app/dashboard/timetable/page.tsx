@@ -153,6 +153,31 @@ export default function TimetablePage() {
     return mergedSlots;
   };
 
+  const handleExport = async () => {
+    try {
+      const token = localStorage.getItem('access_token');
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1'}/timetable/export`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (!response.ok) throw new Error("Export failed");
+      
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'timetable.csv';
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (err) {
+      console.error("Failed to export:", err);
+    }
+  };
+
   return (
     <main ref={containerRef} className="flex-1 p-margin-desktop md:p-margin-desktop p-margin-mobile overflow-y-auto">
       <div className="max-w-[1500px] mx-auto h-full flex flex-col gap-lg pb-10">
@@ -172,9 +197,12 @@ export default function TimetablePage() {
               <Filter size={18} className="group-hover:text-primary transition-colors" />
               Filter
             </button>
-            <button className="group px-md py-sm border border-outline-variant/50 rounded-xl font-label-md text-label-md text-on-surface hover:bg-surface-container-high transition-all duration-300 flex items-center gap-2 bg-surface/50 backdrop-blur shadow-sm hover:shadow-md hover:-translate-y-0.5">
+            <button 
+              onClick={handleExport}
+              className="group px-md py-sm border border-outline-variant/50 rounded-xl font-label-md text-label-md text-on-surface hover:bg-surface-container-high transition-all duration-300 flex items-center gap-2 bg-surface/50 backdrop-blur shadow-sm hover:shadow-md hover:-translate-y-0.5"
+            >
               <Share size={18} className="group-hover:text-primary transition-colors" />
-              Export
+              Export CSV
             </button>
           </div>
         </div>

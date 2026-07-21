@@ -4,8 +4,10 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import { PageTransition } from "@/components/layout/page-transition";
+import { ChatAssistant } from "@/components/ai/chat-assistant";
+import { NotificationDropdown } from "@/components/notifications/notification-dropdown";
 import { 
-  LayoutDashboard, Calendar, Building2, GraduationCap, Settings, Bell, Moon, User,
+  LayoutDashboard, Calendar, Building2, GraduationCap, Settings, Bell, Moon, User, FileText,
   Home, Sparkles, Search, ChevronLeft, ChevronRight
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -28,12 +30,13 @@ export default function DashboardLayout({
   const allNavItems = [
     { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard", roles: ["admin", "faculty", "student"] },
     { href: "/dashboard/timetable", icon: Calendar, label: "Timetable", roles: ["admin", "faculty", "student"] },
+    { href: "/dashboard/attendance", icon: FileText, label: "Attendance OCR", roles: ["admin", "faculty"] },
     { href: "/dashboard/departments", icon: Building2, label: "Departments", roles: ["admin"] },
     { href: "/dashboard/classrooms", icon: Building2, label: "Classrooms", roles: ["admin"] },
     { href: "/dashboard/subjects", icon: Building2, label: "Subjects", roles: ["admin"] },
     { href: "/dashboard/faculty", icon: GraduationCap, label: "Faculty", roles: ["admin"] },
     { href: "/dashboard/profile", icon: User, label: "Profile", roles: ["admin", "faculty", "student"] },
-    { href: "/dashboard/settings", icon: Settings, label: "Settings", roles: ["admin"] },
+    { href: "/dashboard/settings", icon: Settings, roles: ["admin"] },
   ];
 
   const navItems = allNavItems.filter(item => !role || item.roles.includes(role));
@@ -145,15 +148,20 @@ export default function DashboardLayout({
           </div>
           
           <div className="flex items-center gap-2 md:gap-4 ml-auto">
-            <button className="group text-on-surface-variant hover:text-primary transition-all duration-300 hover:bg-primary/10 w-10 h-10 rounded-full flex items-center justify-center">
-              <Bell size={20} className="group-hover:animate-wiggle" />
-            </button>
+            <NotificationDropdown />
             <button className="group text-on-surface-variant hover:text-primary transition-all duration-300 hover:bg-primary/10 w-10 h-10 rounded-full flex items-center justify-center">
               <Moon size={20} className="group-hover:-rotate-12" />
             </button>
-            <Link href="/dashboard/profile" className="w-10 h-10 rounded-full border-2 border-primary/20 bg-gradient-to-br from-surface-container to-surface-container-high flex items-center justify-center overflow-hidden hover:border-primary transition-colors cursor-pointer ml-2 shadow-sm">
-              <User size={18} className="text-primary" />
-            </Link>
+            <div className="flex items-center gap-3 ml-2 border-l border-outline-variant/30 pl-4">
+              <div className="hidden md:flex flex-col items-end justify-center">
+                <span className="text-xs font-semibold text-primary uppercase tracking-wider bg-primary/10 px-2 py-0.5 rounded-full border border-primary/20">
+                  {role === 'faculty' ? 'Staff' : (role || 'User')}
+                </span>
+              </div>
+              <Link href="/dashboard/profile" className="w-10 h-10 rounded-full border-2 border-primary/20 bg-gradient-to-br from-surface-container to-surface-container-high flex items-center justify-center overflow-hidden hover:border-primary transition-colors cursor-pointer shadow-sm">
+                <User size={18} className="text-primary" />
+              </Link>
+            </div>
           </div>
         </header>
         
@@ -188,6 +196,8 @@ export default function DashboardLayout({
           );
         })}
       </nav>
+
+      <ChatAssistant />
     </div>
   );
 }
