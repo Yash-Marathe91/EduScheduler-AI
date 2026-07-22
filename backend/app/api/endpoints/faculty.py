@@ -9,6 +9,7 @@ from app.db.database import get_db
 from app.models.domain import Faculty
 from app.schemas.faculty import FacultyCreate, FacultyUpdate, FacultyResponse
 from app.api.deps import CurrentUser
+from app.services.ocr_service import extract_id_card_from_image
 
 router = APIRouter()
 
@@ -20,24 +21,16 @@ async def parse_id_card(
     """
     Accepts an uploaded faculty ID card and extracts data using OCR.
     """
-    # 1. Read the uploaded image (for actual OCR processing later)
-    contents = await file.read()
-    
-    # 2. Simulate AI OCR Processing Time
-    await asyncio.sleep(2)
-    
-    # 3. Return Mocked Extracted Data for the Demo
-    # In production, replace this with pytesseract or OpenAI Vision API
-    return {
-        "success": True,
-        "data": {
-            "name": "Dr. Sarah Mitchell",
-            "employee_id": "EMP-98234",
-            "department": "Computer Science",
-            "designation": "Associate Professor",
-            "qualifications": ["Ph.D. in AI", "M.Tech"]
+    try:
+        contents = await file.read()
+        extracted_data = await extract_id_card_from_image(contents)
+        
+        return {
+            "success": True,
+            "data": extracted_data
         }
-    }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/", response_model=List[FacultyResponse])
 async def get_faculties(
