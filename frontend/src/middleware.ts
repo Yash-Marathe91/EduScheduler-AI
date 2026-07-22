@@ -42,10 +42,9 @@ export async function middleware(request: NextRequest) {
   if (!isApiRoute) {
     if (!user && !isPublicRoute) {
       // no user, potentially respond by redirecting the user to the login page
-      // BYPASSED FOR LOCAL DEMO
-      // const url = request.nextUrl.clone()
-      // url.pathname = '/auth/login'
-      // return NextResponse.redirect(url)
+      const url = request.nextUrl.clone()
+      url.pathname = '/auth/login'
+      return NextResponse.redirect(url)
     }
     
     if (user && isAuthRoute) {
@@ -53,6 +52,28 @@ export async function middleware(request: NextRequest) {
       const url = request.nextUrl.clone()
       url.pathname = '/dashboard'
       return NextResponse.redirect(url)
+    }
+
+    // Role-Based Access Control (RBAC)
+    if (user) {
+      const role = user.user_metadata?.role || 'student';
+      const path = request.nextUrl.pathname;
+      
+      // Admin only routes
+      const adminRoutes = ['/dashboard/departments', '/dashboard/classrooms', '/dashboard/subjects', '/dashboard/faculty', '/dashboard/settings'];
+      if (adminRoutes.some(r => path.startsWith(r)) && role !== 'admin') {
+        const url = request.nextUrl.clone()
+        url.pathname = '/dashboard'
+        return NextResponse.redirect(url)
+      }
+
+      // Faculty and Admin only routes
+      const staffRoutes = ['/dashboard/attendance'];
+      if (staffRoutes.some(r => path.startsWith(r)) && role === 'student') {
+        const url = request.nextUrl.clone()
+        url.pathname = '/dashboard'
+        return NextResponse.redirect(url)
+      }
     }
   }
 
