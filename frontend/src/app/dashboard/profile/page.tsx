@@ -48,7 +48,7 @@ export default function ProfilePage() {
           setDesignation(profile.faculty_details.designation || '');
           setDepartmentId(profile.faculty_details.department_id || '');
           setEmployeeId(profile.faculty_details.employee_id || '');
-          setExtendedPreferences(profile.faculty_details.extended_preferences || {});
+          setExtendedPreferences((profile.faculty_details as any).extended_preferences || {});
       }
     }
   }, [profile]);
