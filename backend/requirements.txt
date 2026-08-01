@@ -18,3 +18,4 @@ python-dotenv
 google-generativeai
 pillow
 python-multipart
+langchain-google-genai
