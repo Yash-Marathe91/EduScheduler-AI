@@ -14,6 +14,7 @@ class StudentDetailsSchema(BaseModel):
     batch_id: Optional[UUID] = None
     current_semester_id: Optional[UUID] = None
     phone: Optional[str] = None
+    extended_preferences: Optional[dict] = None
 
 class ProfileResponse(BaseModel):
     id: UUID

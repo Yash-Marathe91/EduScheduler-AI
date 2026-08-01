@@ -55,7 +55,8 @@ async def get_my_profile(
                 "enrollment_number": stu_details.enrollment_number,
                 "batch_id": stu_details.batch_id,
                 "current_semester_id": stu_details.current_semester_id,
-                "phone": stu_details.phone
+                "phone": stu_details.phone,
+                "extended_preferences": stu_details.extended_preferences
             }
             
     return response_data

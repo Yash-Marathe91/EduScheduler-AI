@@ -114,6 +114,7 @@ class StudentDetails(Base):
     batch_id = Column(UUID(as_uuid=True), ForeignKey("batches.id"), nullable=True)
     current_semester_id = Column(UUID(as_uuid=True), ForeignKey("semesters.id"), nullable=True)
     phone = Column(String(20), nullable=True)
+    extended_preferences = Column(JSONB, default={}, nullable=True)
 
 class TimetableSettings(Base):
     __tablename__ = "timetable_settings"

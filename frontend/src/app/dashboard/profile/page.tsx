@@ -6,6 +6,7 @@ import { useDepartments } from '@/hooks/use-departments';
 import { User, Check, AlertCircle, Building2, Briefcase, GraduationCap, Phone, Hash } from 'lucide-react';
 import gsap from 'gsap';
 import { FacultyExtendedProfile } from '@/components/profile/faculty-extended-profile';
+import { StudentExtendedProfile } from '@/components/profile/student-extended-profile';
 
 export default function ProfilePage() {
   const { profile, isLoading, updateProfile, isUpdating } = useProfile();
@@ -23,6 +24,7 @@ export default function ProfilePage() {
   // Student Details
   const [enrollmentNumber, setEnrollmentNumber] = useState('');
   const [phone, setPhone] = useState('');
+  const [studentExtendedPreferences, setStudentExtendedPreferences] = useState<any>({});
   
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const [localRole, setLocalRole] = useState<string>('student');
@@ -42,6 +44,7 @@ export default function ProfilePage() {
       } else if (profile.role === 'student' && profile.student_details) {
         setEnrollmentNumber(profile.student_details.enrollment_number || '');
         setPhone(profile.student_details.phone || '');
+        setStudentExtendedPreferences((profile.student_details as any).extended_preferences || {});
         // Student's department might come from their batch, but let's assume they can select it for now or it's read-only
       } else if (profile.role === 'admin' && profile.faculty_details) {
           // admins might also be faculty
@@ -76,7 +79,8 @@ export default function ProfilePage() {
       } else if (localRole === 'student') {
         payload.student_details = {
           enrollment_number: enrollmentNumber,
-          phone
+          phone,
+          extended_preferences: studentExtendedPreferences
         };
       }
 
@@ -256,6 +260,12 @@ export default function ProfilePage() {
             <FacultyExtendedProfile 
               preferences={extendedPreferences} 
               onChange={setExtendedPreferences} 
+            />
+          {/* EXTENDED STUDENT CONFIGURATION */}
+          {localRole === 'student' && (
+            <StudentExtendedProfile 
+              preferences={studentExtendedPreferences} 
+              onChange={setStudentExtendedPreferences} 
             />
           )}
           
