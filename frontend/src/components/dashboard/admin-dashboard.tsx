@@ -3,10 +3,9 @@
 import { useState, useEffect } from 'react';
 import { 
   Building2, Users, GraduationCap, BookOpen, Calendar, MapPin, 
-  Sparkles, CheckCircle2, Clock, AlertTriangle, Play, CalendarPlus,
-  FileText, Upload, Plus, BarChart3, TrendingUp, Cpu, Server,
   Search, Filter, Send, Bot, Check, ArrowRight, AlertOctagon, 
-  MessageSquare, CalendarDays, Activity, FileBarChart, BellRing, X
+  MessageSquare, CalendarDays, Activity, FileBarChart, BellRing, X,
+  Database, Wifi, HardDrive, History, PieChart, Download, ShieldCheck, BarChart2
 } from 'lucide-react';
 import gsap from 'gsap';
 
@@ -580,6 +579,184 @@ export function AdminDashboard() {
           </div>
 
         </div>
+      </div>
+
+      {/* --- PHASE 4 START --- */}
+
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 pt-4">
+        
+        {/* LEFT COLUMN: ANALYTICS & SYSTEM HEALTH */}
+        <div className="xl:col-span-2 space-y-8">
+          
+          {/* ANALYTICS & REPORTS */}
+          <div className="bg-surface border border-outline-variant/30 rounded-3xl p-6 md:p-8 shadow-sm">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+              <h3 className="text-xl font-bold text-on-surface flex items-center gap-2"><BarChart2 size={22} className="text-primary"/> Analytics & Reports</h3>
+              <button className="flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-xl text-sm font-bold hover:bg-primary/20 transition-colors">
+                <Download size={16}/> Export All Reports
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="bg-surface-container/50 border border-outline-variant/30 rounded-2xl p-5 flex flex-col justify-between min-h-[160px]">
+                <div className="flex justify-between items-start mb-4">
+                  <div>
+                    <p className="text-sm font-bold text-on-surface">Faculty Workload Distribution</p>
+                    <p className="text-xs text-on-surface-variant mt-1">Optimization level: <span className="text-success font-bold">92%</span></p>
+                  </div>
+                  <PieChart size={20} className="text-tertiary"/>
+                </div>
+                <div className="flex gap-1 h-12 items-end">
+                  {/* Fake Bar Chart */}
+                  <div className="w-1/6 bg-tertiary/20 rounded-t-sm h-[40%]"></div>
+                  <div className="w-1/6 bg-tertiary/40 rounded-t-sm h-[60%]"></div>
+                  <div className="w-1/6 bg-tertiary/60 rounded-t-sm h-[80%]"></div>
+                  <div className="w-1/6 bg-tertiary/80 rounded-t-sm h-[100%]"></div>
+                  <div className="w-1/6 bg-tertiary/60 rounded-t-sm h-[75%]"></div>
+                  <div className="w-1/6 bg-tertiary/40 rounded-t-sm h-[50%]"></div>
+                </div>
+              </div>
+
+              <div className="bg-surface-container/50 border border-outline-variant/30 rounded-2xl p-5 flex flex-col justify-between min-h-[160px]">
+                <div className="flex justify-between items-start mb-4">
+                  <div>
+                    <p className="text-sm font-bold text-on-surface">AI Optimization History</p>
+                    <p className="text-xs text-on-surface-variant mt-1">Conflicts resolved over 7 days</p>
+                  </div>
+                  <TrendingUp size={20} className="text-primary"/>
+                </div>
+                <div className="flex gap-2 h-12 items-end">
+                  {/* Fake Line/Bar Chart */}
+                  <div className="w-1/7 bg-primary/30 rounded-t-sm h-[30%]"></div>
+                  <div className="w-1/7 bg-primary/40 rounded-t-sm h-[50%]"></div>
+                  <div className="w-1/7 bg-primary/60 rounded-t-sm h-[40%]"></div>
+                  <div className="w-1/7 bg-primary/80 rounded-t-sm h-[70%]"></div>
+                  <div className="w-1/7 bg-primary/90 rounded-t-sm h-[90%]"></div>
+                  <div className="w-1/7 bg-primary rounded-t-sm h-[60%]"></div>
+                  <div className="w-1/7 bg-primary/50 rounded-t-sm h-[20%]"></div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-6">
+              <button className="py-2 border border-outline-variant/50 rounded-xl text-xs font-medium text-on-surface hover:bg-surface-container transition-colors flex flex-col items-center justify-center gap-1">
+                <FileBarChart size={16} className="text-primary"/> Attendance PDF
+              </button>
+              <button className="py-2 border border-outline-variant/50 rounded-xl text-xs font-medium text-on-surface hover:bg-surface-container transition-colors flex flex-col items-center justify-center gap-1">
+                <FileBarChart size={16} className="text-secondary"/> Room Usage CSV
+              </button>
+              <button className="py-2 border border-outline-variant/50 rounded-xl text-xs font-medium text-on-surface hover:bg-surface-container transition-colors flex flex-col items-center justify-center gap-1">
+                <FileBarChart size={16} className="text-tertiary"/> Workload Excel
+              </button>
+              <button className="py-2 border border-outline-variant/50 rounded-xl text-xs font-medium text-on-surface hover:bg-surface-container transition-colors flex flex-col items-center justify-center gap-1">
+                <FileBarChart size={16} className="text-error"/> Leave Report
+              </button>
+            </div>
+          </div>
+
+          {/* SYSTEM HEALTH */}
+          <div className="bg-surface border border-outline-variant/30 rounded-3xl p-6 md:p-8 shadow-sm">
+            <h3 className="text-xl font-bold text-on-surface flex items-center gap-2 mb-6"><ShieldCheck size={22} className="text-success"/> System Health</h3>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+              <div className="flex items-center gap-4 p-4 rounded-2xl bg-surface-container border border-outline-variant/30">
+                <div className="p-3 bg-success/20 text-success rounded-xl"><Database size={20}/></div>
+                <div>
+                  <p className="text-xs text-on-surface-variant uppercase font-bold">Database</p>
+                  <p className="text-lg font-bold text-on-surface">Connected</p>
+                  <p className="text-[10px] text-success font-medium">9ms latency</p>
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-4 p-4 rounded-2xl bg-surface-container border border-outline-variant/30">
+                <div className="p-3 bg-primary/20 text-primary rounded-xl"><Wifi size={20}/></div>
+                <div>
+                  <p className="text-xs text-on-surface-variant uppercase font-bold">API Services</p>
+                  <p className="text-lg font-bold text-on-surface">Operational</p>
+                  <p className="text-[10px] text-primary font-medium">99.9% Uptime</p>
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-4 p-4 rounded-2xl bg-surface-container border border-outline-variant/30">
+                <div className="p-3 bg-secondary/20 text-secondary rounded-xl"><Cpu size={20}/></div>
+                <div>
+                  <p className="text-xs text-on-surface-variant uppercase font-bold">AI Engine</p>
+                  <p className="text-lg font-bold text-on-surface">Idle</p>
+                  <p className="text-[10px] text-secondary font-medium">0 active jobs</p>
+                </div>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-6">
+              <div>
+                <div className="flex justify-between text-xs font-bold mb-2">
+                  <span className="text-on-surface-variant">CPU Usage</span>
+                  <span className="text-on-surface">12%</span>
+                </div>
+                <div className="w-full bg-surface-container rounded-full h-1.5">
+                  <div className="bg-primary h-1.5 rounded-full" style={{ width: '12%' }}></div>
+                </div>
+              </div>
+              <div>
+                <div className="flex justify-between text-xs font-bold mb-2">
+                  <span className="text-on-surface-variant">Memory Usage (2.4/8 GB)</span>
+                  <span className="text-on-surface">30%</span>
+                </div>
+                <div className="w-full bg-surface-container rounded-full h-1.5">
+                  <div className="bg-secondary h-1.5 rounded-full" style={{ width: '30%' }}></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        {/* RIGHT COLUMN: RECENT ACTIVITIES */}
+        <div className="space-y-8">
+          
+          <div className="bg-surface border border-outline-variant/30 rounded-3xl p-6 shadow-sm h-full flex flex-col">
+            <h3 className="text-xl font-bold text-on-surface flex items-center gap-2 mb-6"><History size={22} className="text-on-surface-variant"/> Recent Activities</h3>
+            
+            <div className="flex-1 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-outline-variant/30 before:to-transparent">
+              
+              {[
+                { time: '10:42 AM', action: 'Timetable Published', desc: 'Semester V CSE timetable was successfully generated and published by AI.', icon: Calendar, color: 'text-primary bg-primary/10 ring-primary/20' },
+                { time: '09:15 AM', action: 'Faculty Added', desc: 'Dr. Ramesh Kumar was added to Mechanical Department.', icon: Users, color: 'text-success bg-success/10 ring-success/20' },
+                { time: 'Yesterday', action: 'Leave Approved', desc: 'Prof. Verma\'s sick leave was approved by Super Admin.', icon: CheckCircle2, color: 'text-tertiary bg-tertiary/10 ring-tertiary/20' },
+                { time: 'Yesterday', action: 'Reports Downloaded', desc: 'Monthly attendance report exported as PDF.', icon: Download, color: 'text-on-surface-variant bg-surface-container ring-outline-variant/20' },
+              ].map((act, i) => (
+                <div key={i} className="relative flex items-start justify-between mb-8 group">
+                  <div className="flex items-start gap-4">
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center ring-4 shadow-sm z-10 ${act.color}`}>
+                      <act.icon size={16}/>
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-on-surface">{act.action}</p>
+                      <p className="text-xs text-on-surface-variant mt-1 leading-snug">{act.desc}</p>
+                      <p className="text-[10px] font-bold text-on-surface-variant mt-2 uppercase">{act.time}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+              
+            </div>
+            
+            <button className="w-full mt-4 py-2 border-2 border-outline-variant/50 rounded-xl text-sm font-bold text-on-surface hover:bg-surface-container transition-colors">
+              View All Logs
+            </button>
+          </div>
+
+        </div>
+      </div>
+
+      {/* FOOTER */}
+      <div className="mt-12 py-6 border-t border-outline-variant/30 flex flex-col md:flex-row items-center justify-between gap-4 text-xs font-medium text-on-surface-variant">
+        <div className="flex items-center gap-4">
+          <span className="flex items-center gap-1.5"><ShieldCheck size={14} className="text-success"/> EduScheduler AI v2.4.0</span>
+          <span className="hidden md:inline-block border-l border-outline-variant/50 h-3"></span>
+          <span className="hidden md:inline-flex items-center gap-1.5"><Database size={14}/> Last Sync: 2 mins ago</span>
+        </div>
+        <p>© 2025 EduScheduler AI. All rights reserved.</p>
       </div>
 
     </div>
