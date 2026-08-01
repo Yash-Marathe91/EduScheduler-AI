@@ -7,6 +7,7 @@ import { User, Check, AlertCircle, Building2, Briefcase, GraduationCap, Phone, H
 import gsap from 'gsap';
 import { FacultyExtendedProfile } from '@/components/profile/faculty-extended-profile';
 import { StudentExtendedProfile } from '@/components/profile/student-extended-profile';
+import { AdminExtendedProfile } from '@/components/profile/admin-extended-profile';
 
 export default function ProfilePage() {
   const { profile, isLoading, updateProfile, isUpdating } = useProfile();
@@ -26,6 +27,9 @@ export default function ProfilePage() {
   const [phone, setPhone] = useState('');
   const [studentExtendedPreferences, setStudentExtendedPreferences] = useState<any>({});
   
+  // Admin Details
+  const [adminExtendedPreferences, setAdminExtendedPreferences] = useState<any>({});
+  
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const [localRole, setLocalRole] = useState<string>('student');
 
@@ -41,6 +45,7 @@ export default function ProfilePage() {
         setDesignation(profile.faculty_details.designation || '');
         setDepartmentId(profile.faculty_details.department_id || '');
         setEmployeeId(profile.faculty_details.employee_id || '');
+        setExtendedPreferences((profile.faculty_details as any).extended_preferences || {});
       } else if (profile.role === 'student' && profile.student_details) {
         setEnrollmentNumber(profile.student_details.enrollment_number || '');
         setPhone(profile.student_details.phone || '');
@@ -51,7 +56,7 @@ export default function ProfilePage() {
           setDesignation(profile.faculty_details.designation || '');
           setDepartmentId(profile.faculty_details.department_id || '');
           setEmployeeId(profile.faculty_details.employee_id || '');
-          setExtendedPreferences((profile.faculty_details as any).extended_preferences || {});
+          setAdminExtendedPreferences((profile.faculty_details as any).extended_preferences || {});
       }
     }
   }, [profile]);
@@ -69,12 +74,19 @@ export default function ProfilePage() {
     try {
       const payload: any = { full_name: fullName, role: localRole };
       
-      if (localRole === 'faculty' || localRole === 'admin') {
+      if (localRole === 'faculty') {
         payload.faculty_details = {
-          designation,
           department_id: departmentId || null,
+          designation,
           employee_id: employeeId,
           extended_preferences: extendedPreferences
+        };
+      } else if (localRole === 'admin') {
+        payload.faculty_details = {
+          department_id: departmentId || null,
+          designation,
+          employee_id: employeeId,
+          extended_preferences: adminExtendedPreferences
         };
       } else if (localRole === 'student') {
         payload.student_details = {
@@ -158,8 +170,8 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          {/* FACULTY SPECIFIC DETAILS */}
-          {localRole === 'faculty' && (
+          {/* STAFF / ADMIN SPECIFIC DETAILS */}
+          {(localRole === 'faculty' || localRole === 'admin') && (
             <div className="profile-card bg-surface/60 backdrop-blur-xl border border-outline-variant/30 rounded-3xl p-xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col gap-md relative overflow-hidden">
                 <div className="flex items-center gap-3 mb-2">
                     <div className="w-10 h-10 rounded-xl bg-secondary/10 flex items-center justify-center text-secondary">
@@ -261,6 +273,15 @@ export default function ProfilePage() {
               preferences={extendedPreferences} 
               onChange={setExtendedPreferences} 
             />
+          )}
+          {/* EXTENDED ADMIN CONFIGURATION */}
+          {localRole === 'admin' && (
+            <AdminExtendedProfile 
+              preferences={adminExtendedPreferences} 
+              onChange={setAdminExtendedPreferences}
+              profile={profile}
+            />
+          )}
           {/* EXTENDED STUDENT CONFIGURATION */}
           {localRole === 'student' && (
             <StudentExtendedProfile 
