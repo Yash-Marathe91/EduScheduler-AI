@@ -18,6 +18,7 @@ export default function ProfilePage() {
   const [designation, setDesignation] = useState('');
   const [departmentId, setDepartmentId] = useState('');
   const [employeeId, setEmployeeId] = useState('');
+  const [extendedPreferences, setExtendedPreferences] = useState<any>({});
 
   // Student Details
   const [enrollmentNumber, setEnrollmentNumber] = useState('');
@@ -47,6 +48,7 @@ export default function ProfilePage() {
           setDesignation(profile.faculty_details.designation || '');
           setDepartmentId(profile.faculty_details.department_id || '');
           setEmployeeId(profile.faculty_details.employee_id || '');
+          setExtendedPreferences(profile.faculty_details.extended_preferences || {});
       }
     }
   }, [profile]);
@@ -68,7 +70,8 @@ export default function ProfilePage() {
         payload.faculty_details = {
           designation,
           department_id: departmentId || null,
-          employee_id: employeeId
+          employee_id: employeeId,
+          extended_preferences: extendedPreferences
         };
       } else if (localRole === 'student') {
         payload.student_details = {
@@ -250,7 +253,10 @@ export default function ProfilePage() {
           )}
           {/* EXTENDED FACULTY CONFIGURATION */}
           {(localRole === 'faculty' || localRole === 'admin') && (
-            <FacultyExtendedProfile />
+            <FacultyExtendedProfile 
+              preferences={extendedPreferences} 
+              onChange={setExtendedPreferences} 
+            />
           )}
           
           <div className="profile-card flex justify-end mt-4">

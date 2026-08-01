@@ -8,8 +8,21 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
-export function FacultyExtendedProfile() {
+interface FacultyExtendedProfileProps {
+  preferences: any;
+  onChange: (newPrefs: any) => void;
+}
+
+export function FacultyExtendedProfile({ preferences = {}, onChange }: FacultyExtendedProfileProps) {
   const [activeTab, setActiveTab] = useState('academic');
+
+  // Helper to safely update nested JSON preferences
+  const updatePref = (category: string, key: string, value: any) => {
+    const updated = { ...preferences };
+    if (!updated[category]) updated[category] = {};
+    updated[category][key] = value;
+    onChange(updated);
+  };
 
   const tabs = [
     { id: 'academic', label: 'Academic Details', icon: BookOpen },
@@ -71,31 +84,41 @@ export function FacultyExtendedProfile() {
                 <div className="space-y-3">
                   <label className="text-sm font-medium text-on-surface-variant">Theory Subjects (Semester V)</label>
                   <div className="p-4 bg-surface rounded-xl border border-outline-variant/50 space-y-2">
-                    <label className="flex items-center gap-3 cursor-pointer">
-                      <input type="checkbox" defaultChecked className="w-4 h-4 rounded border-outline text-primary focus:ring-primary" />
-                      <span className="text-sm text-on-surface">Data Structures & Algorithms</span>
-                    </label>
-                    <label className="flex items-center gap-3 cursor-pointer">
-                      <input type="checkbox" defaultChecked className="w-4 h-4 rounded border-outline text-primary focus:ring-primary" />
-                      <span className="text-sm text-on-surface">Database Management Systems</span>
-                    </label>
-                    <label className="flex items-center gap-3 cursor-pointer">
-                      <input type="checkbox" className="w-4 h-4 rounded border-outline text-primary focus:ring-primary" />
-                      <span className="text-sm text-on-surface">Digital Electronics</span>
-                    </label>
+                    {['Data Structures & Algorithms', 'Database Management Systems', 'Digital Electronics'].map(sub => (
+                       <label key={sub} className="flex items-center gap-3 cursor-pointer">
+                         <input 
+                           type="checkbox" 
+                           checked={preferences?.academic?.theory?.includes(sub) || false}
+                           onChange={(e) => {
+                              const current = preferences?.academic?.theory || [];
+                              const next = e.target.checked ? [...current, sub] : current.filter((s: string) => s !== sub);
+                              updatePref('academic', 'theory', next);
+                           }}
+                           className="w-4 h-4 rounded border-outline text-primary focus:ring-primary" 
+                         />
+                         <span className="text-sm text-on-surface">{sub}</span>
+                       </label>
+                    ))}
                   </div>
                 </div>
                 <div className="space-y-3">
                   <label className="text-sm font-medium text-on-surface-variant">Practical Subjects / Labs</label>
                   <div className="p-4 bg-surface rounded-xl border border-outline-variant/50 space-y-2">
-                    <label className="flex items-center gap-3 cursor-pointer">
-                      <input type="checkbox" defaultChecked className="w-4 h-4 rounded border-outline text-primary focus:ring-primary" />
-                      <span className="text-sm text-on-surface">DBMS Lab (Batch A, B)</span>
-                    </label>
-                    <label className="flex items-center gap-3 cursor-pointer">
-                      <input type="checkbox" className="w-4 h-4 rounded border-outline text-primary focus:ring-primary" />
-                      <span className="text-sm text-on-surface">Embedded Systems Lab</span>
-                    </label>
+                    {['DBMS Lab (Batch A, B)', 'Embedded Systems Lab'].map(sub => (
+                       <label key={sub} className="flex items-center gap-3 cursor-pointer">
+                         <input 
+                           type="checkbox" 
+                           checked={preferences?.academic?.practical?.includes(sub) || false}
+                           onChange={(e) => {
+                              const current = preferences?.academic?.practical || [];
+                              const next = e.target.checked ? [...current, sub] : current.filter((s: string) => s !== sub);
+                              updatePref('academic', 'practical', next);
+                           }}
+                           className="w-4 h-4 rounded border-outline text-primary focus:ring-primary" 
+                         />
+                         <span className="text-sm text-on-surface">{sub}</span>
+                       </label>
+                    ))}
                   </div>
                 </div>
               </div>
@@ -106,16 +129,27 @@ export function FacultyExtendedProfile() {
             <div>
               <h3 className="text-lg font-bold text-on-surface mb-4">Subject Expertise</h3>
               <div className="space-y-4">
-                {['Artificial Intelligence', 'Machine Learning', 'Python Programming', 'Java', 'Networking'].map((sub, i) => (
-                  <div key={sub} className="flex items-center justify-between p-3 bg-surface rounded-lg border border-outline-variant/30">
-                    <span className="text-sm font-medium text-on-surface">{sub}</span>
-                    <div className="flex gap-1 text-primary">
-                      {[1,2,3,4,5].map(star => (
-                        <Award key={star} size={16} className={star <= (5 - (i > 2 ? 1 : 0)) ? 'fill-primary' : 'fill-transparent opacity-30'} />
-                      ))}
+                {['Artificial Intelligence', 'Machine Learning', 'Python Programming', 'Java', 'Networking'].map((sub, i) => {
+                  const rating = preferences?.academic?.expertise?.[sub] || (5 - (i > 2 ? 1 : 0));
+                  return (
+                    <div key={sub} className="flex items-center justify-between p-3 bg-surface rounded-lg border border-outline-variant/30">
+                      <span className="text-sm font-medium text-on-surface">{sub}</span>
+                      <div className="flex gap-1 text-primary">
+                        {[1,2,3,4,5].map(star => (
+                          <Award 
+                            key={star} 
+                            size={16} 
+                            className={`cursor-pointer transition-colors ${star <= rating ? 'fill-primary' : 'fill-transparent opacity-30 hover:opacity-50'}`} 
+                            onClick={() => {
+                               const exp = preferences?.academic?.expertise || {};
+                               updatePref('academic', 'expertise', { ...exp, [sub]: star });
+                            }}
+                          />
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           </div>
@@ -132,11 +166,21 @@ export function FacultyExtendedProfile() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                 <div className="space-y-2">
                     <label className="text-sm font-medium text-on-surface-variant">Max Lectures Per Day</label>
-                    <input type="number" defaultValue={4} className="w-full p-3 bg-surface rounded-xl border border-outline-variant/50 outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
+                    <input 
+                      type="number" 
+                      value={preferences?.availability?.maxLecturesPerDay || 4} 
+                      onChange={(e) => updatePref('availability', 'maxLecturesPerDay', parseInt(e.target.value))}
+                      className="w-full p-3 bg-surface rounded-xl border border-outline-variant/50 outline-none focus:border-primary focus:ring-1 focus:ring-primary" 
+                    />
                 </div>
                 <div className="space-y-2">
                     <label className="text-sm font-medium text-on-surface-variant">Max Continuous Lectures</label>
-                    <input type="number" defaultValue={2} className="w-full p-3 bg-surface rounded-xl border border-outline-variant/50 outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
+                    <input 
+                      type="number" 
+                      value={preferences?.availability?.maxContinuous || 2} 
+                      onChange={(e) => updatePref('availability', 'maxContinuous', parseInt(e.target.value))}
+                      className="w-full p-3 bg-surface rounded-xl border border-outline-variant/50 outline-none focus:border-primary focus:ring-1 focus:ring-primary" 
+                    />
                 </div>
               </div>
 
@@ -157,13 +201,23 @@ export function FacultyExtendedProfile() {
                     {['08:00 - 09:00', '09:00 - 10:00', '10:00 - 11:00'].map(time => (
                       <tr key={time}>
                         <td className="p-3 border border-outline-variant/30 font-medium bg-surface/30">{time}</td>
-                        {[1,2,3,4,5].map(day => (
-                          <td key={day} className="p-3 border border-outline-variant/30 text-center">
-                            <button className={`w-full py-1.5 rounded-md text-xs font-semibold ${day === 2 && time.startsWith('08') ? 'bg-error/10 text-error' : 'bg-success/10 text-success'}`}>
-                              {day === 2 && time.startsWith('08') ? 'Busy' : 'Available'}
-                            </button>
-                          </td>
-                        ))}
+                        {[1,2,3,4,5].map(day => {
+                           const key = `${day}-${time}`;
+                           const isBusy = preferences?.availability?.calendar?.[key] || (day === 2 && time.startsWith('08'));
+                           return (
+                             <td key={day} className="p-3 border border-outline-variant/30 text-center">
+                               <button 
+                                 onClick={() => {
+                                    const cal = preferences?.availability?.calendar || {};
+                                    updatePref('availability', 'calendar', { ...cal, [key]: !isBusy });
+                                 }}
+                                 className={`w-full py-1.5 rounded-md text-xs font-semibold transition-colors ${isBusy ? 'bg-error/10 text-error hover:bg-error/20' : 'bg-success/10 text-success hover:bg-success/20'}`}
+                               >
+                                 {isBusy ? 'Busy' : 'Available'}
+                               </button>
+                             </td>
+                           );
+                        })}
                       </tr>
                     ))}
                   </tbody>
@@ -183,7 +237,16 @@ export function FacultyExtendedProfile() {
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 {['Academic Coordinator', 'Placement Coordinator', 'Project Guide', 'Research Coordinator', 'Exam Cell', 'NAAC Coordinator'].map(duty => (
                   <label key={duty} className="flex items-center gap-3 p-3 bg-surface rounded-xl border border-outline-variant/30 cursor-pointer hover:border-primary/50 transition-colors">
-                    <input type="checkbox" className="w-4 h-4 rounded border-outline text-primary focus:ring-primary" defaultChecked={duty === 'Project Guide'} />
+                    <input 
+                      type="checkbox" 
+                      checked={preferences?.duties?.list?.includes(duty) || duty === 'Project Guide'}
+                      onChange={(e) => {
+                         const current = preferences?.duties?.list || ['Project Guide'];
+                         const next = e.target.checked ? [...current, duty] : current.filter((d: string) => d !== duty);
+                         updatePref('duties', 'list', next);
+                      }}
+                      className="w-4 h-4 rounded border-outline text-primary focus:ring-primary" 
+                    />
                     <span className="text-sm font-medium">{duty}</span>
                   </label>
                 ))}
@@ -214,7 +277,7 @@ export function FacultyExtendedProfile() {
           </div>
         )}
 
-        {/* TAB 4: PREFERENCES */}
+        {/* TAB 4: AI PREFERENCES */}
         {activeTab === 'preferences' && (
           <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
              <div>
@@ -231,15 +294,26 @@ export function FacultyExtendedProfile() {
                   'Prefer morning theory sessions',
                   'Prefer same classroom for back-to-back',
                   'Auto Accept Substitute Requests'
-                ].map(pref => (
-                  <div key={pref} className="flex items-center justify-between p-4 bg-surface rounded-xl border border-outline-variant/30">
-                    <span className="text-sm font-medium">{pref}</span>
-                    <label className="relative inline-flex items-center cursor-pointer">
-                      <input type="checkbox" className="sr-only peer" defaultChecked={pref.includes('morning') || pref.includes('classroom')} />
-                      <div className="w-11 h-6 bg-outline-variant/50 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
-                    </label>
-                  </div>
-                ))}
+                ].map(pref => {
+                   const isChecked = preferences?.ai_rules?.[pref] ?? (pref.includes('morning') || pref.includes('classroom'));
+                   return (
+                     <div key={pref} className="flex items-center justify-between p-4 bg-surface rounded-xl border border-outline-variant/30">
+                       <span className="text-sm font-medium">{pref}</span>
+                       <label className="relative inline-flex items-center cursor-pointer">
+                         <input 
+                           type="checkbox" 
+                           className="sr-only peer" 
+                           checked={isChecked}
+                           onChange={(e) => {
+                              const rules = preferences?.ai_rules || {};
+                              updatePref('ai_rules', pref, e.target.checked);
+                           }}
+                         />
+                         <div className="w-11 h-6 bg-outline-variant/50 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                       </label>
+                     </div>
+                   );
+                })}
               </div>
             </div>
           </div>

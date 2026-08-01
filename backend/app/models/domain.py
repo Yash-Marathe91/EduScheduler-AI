@@ -2,6 +2,7 @@ from sqlalchemy import Column, String, Text, Boolean, Integer, ForeignKey
 from sqlalchemy.orm import relationship
 import uuid
 from sqlalchemy.types import Uuid as UUID
+from sqlalchemy.dialects.postgresql import JSONB
 from app.db.database import Base
 
 class Department(Base):
@@ -103,6 +104,7 @@ class FacultyDetails(Base):
     employee_id = Column(String(50), nullable=True)
     id_card_url = Column(String(255), nullable=True)
     is_verified = Column(Boolean, default=False)
+    extended_preferences = Column(JSONB, default={}, nullable=True)
     
 class StudentDetails(Base):
     __tablename__ = "student_details"

@@ -7,6 +7,7 @@ class FacultyDetailsSchema(BaseModel):
     designation: Optional[str] = None
     employee_id: Optional[str] = None
     is_verified: Optional[bool] = None
+    extended_preferences: Optional[dict] = None
 
 class StudentDetailsSchema(BaseModel):
     enrollment_number: Optional[str] = None

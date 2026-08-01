@@ -44,7 +44,8 @@ async def get_my_profile(
                 "department_id": fac_details.department_id,
                 "designation": fac_details.designation,
                 "employee_id": fac_details.employee_id,
-                "is_verified": fac_details.is_verified
+                "is_verified": fac_details.is_verified,
+                "extended_preferences": fac_details.extended_preferences
             }
     elif profile.role == 'student':
         stu_result = await db.execute(select(StudentDetails).filter(StudentDetails.id == user_id))
