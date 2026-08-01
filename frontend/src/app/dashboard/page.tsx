@@ -1,30 +1,37 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { AdminDashboard } from '@/components/dashboard/admin-dashboard';
+
 export default function DashboardPage() {
+  const [localRole, setLocalRole] = useState<string>('student');
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setLocalRole(localStorage.getItem('userRole') || 'student');
+    setIsMounted(true);
+  }, []);
+
+  if (!isMounted) return null; // Avoid hydration mismatch
+
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-3xl font-bold tracking-tight text-slate-900">Dashboard</h2>
-        <p className="text-slate-500 mt-2">
-          Overview of your institution's academic scheduling and operations.
-        </p>
-      </div>
+    <div className="w-full">
+      {localRole === 'admin' && <AdminDashboard />}
       
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-        {/* Placeholder cards to fulfill the "wowed" minimal UI requirement */}
-        {[
-          { label: 'Total Faculty', value: '142', change: '+4 this month' },
-          { label: 'Active Departments', value: '8', change: 'Stable' },
-          { label: 'Schedules Generated', value: '24', change: '+12% from last term' },
-          { label: 'System Health', value: '99.9%', change: 'All systems operational' },
-        ].map((stat, i) => (
-          <div key={i} className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm hover:shadow-md transition">
-            <div className="flex flex-row items-center justify-between pb-2">
-              <h3 className="text-sm font-medium text-slate-500">{stat.label}</h3>
-            </div>
-            <div className="text-2xl font-bold text-slate-900">{stat.value}</div>
-            <p className="text-xs text-slate-500 mt-1">{stat.change}</p>
-          </div>
-        ))}
-      </div>
+      {/* Placeholders for Faculty and Student dashboards */}
+      {localRole === 'faculty' && (
+        <div className="p-8">
+          <h2 className="text-3xl font-bold tracking-tight text-on-surface">Faculty Dashboard</h2>
+          <p className="text-on-surface-variant mt-2">Welcome to the faculty portal. Check your schedule below.</p>
+        </div>
+      )}
+      
+      {localRole === 'student' && (
+        <div className="p-8">
+          <h2 className="text-3xl font-bold tracking-tight text-on-surface">Student Dashboard</h2>
+          <p className="text-on-surface-variant mt-2">Welcome to the student portal. Your timetable is loading...</p>
+        </div>
+      )}
     </div>
   );
 }
