@@ -5,6 +5,7 @@ import { useProfile } from '@/hooks/use-profile';
 import { useDepartments } from '@/hooks/use-departments';
 import { User, Check, AlertCircle, Building2, Briefcase, GraduationCap, Phone, Hash } from 'lucide-react';
 import gsap from 'gsap';
+import { FacultyExtendedProfile } from '@/components/profile/faculty-extended-profile';
 
 export default function ProfilePage() {
   const { profile, isLoading, updateProfile, isUpdating } = useProfile();
@@ -246,6 +247,10 @@ export default function ProfilePage() {
                     </div>
                 </div>
             </div>
+          )}
+          {/* EXTENDED FACULTY CONFIGURATION */}
+          {(localRole === 'faculty' || localRole === 'admin') && (
+            <FacultyExtendedProfile />
           )}
           
           <div className="profile-card flex justify-end mt-4">
