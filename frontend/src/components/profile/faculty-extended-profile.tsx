@@ -2,11 +2,9 @@
 
 import { useState } from 'react';
 import { 
-  User, Briefcase, BookOpen, Calendar, Clock, Award, 
-  FileText, CheckCircle2, AlertCircle, Building2, 
-  GraduationCap, Bell, Activity, Hash
+  BookOpen, Calendar, Clock, Award, 
+  CheckCircle2, Activity, MapPin, Target, ChevronDown, ChevronUp, Layers, Sparkles
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 
 interface FacultyExtendedProfileProps {
   preferences: any;
@@ -14,9 +12,8 @@ interface FacultyExtendedProfileProps {
 }
 
 export function FacultyExtendedProfile({ preferences = {}, onChange }: FacultyExtendedProfileProps) {
-  const [activeTab, setActiveTab] = useState('academic');
+  const [expandedSection, setExpandedSection] = useState<string>('academic');
 
-  // Helper to safely update nested JSON preferences
   const updatePref = (category: string, key: string, value: any) => {
     const updated = { ...preferences };
     if (!updated[category]) updated[category] = {};
@@ -24,125 +21,327 @@ export function FacultyExtendedProfile({ preferences = {}, onChange }: FacultyEx
     onChange(updated);
   };
 
-  const tabs = [
-    { id: 'academic', label: 'Academic Details', icon: BookOpen },
-    { id: 'availability', label: 'Availability & Capacity', icon: Clock },
-    { id: 'responsibilities', label: 'Duties & Performance', icon: Award },
-    { id: 'preferences', label: 'AI Preferences', icon: Activity },
-  ];
+  const toggleSection = (section: string) => {
+    setExpandedSection(prev => prev === section ? '' : section);
+  };
 
-  return (
-    <div className="mt-8 flex flex-col md:flex-row gap-8">
-      {/* Sidebar Navigation */}
-      <div className="w-full md:w-64 flex flex-col gap-2 shrink-0">
-        <h3 className="text-sm font-semibold text-on-surface-variant uppercase tracking-wider mb-2 px-4">Faculty Configuration</h3>
-        {tabs.map(tab => {
-          const Icon = tab.icon;
-          const isActive = activeTab === tab.id;
-          return (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 ${
-                isActive 
-                  ? 'bg-primary text-on-primary shadow-md shadow-primary/20 scale-105' 
-                  : 'text-on-surface-variant hover:bg-surface hover:text-on-surface'
-              }`}
-            >
-              <Icon size={18} />
-              <span className="font-medium text-sm">{tab.label}</span>
-            </button>
-          );
-        })}
-        
-        {/* Profile Completion Card */}
-        <div className="mt-8 p-4 bg-surface-container-lowest border border-outline-variant/30 rounded-2xl shadow-sm">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-semibold text-on-surface-variant">Profile Score</span>
-            <span className="text-xs font-bold text-primary">87%</span>
-          </div>
-          <div className="h-2 w-full bg-surface-container rounded-full overflow-hidden">
-            <div className="h-full bg-primary w-[87%] rounded-full"></div>
-          </div>
-          <p className="text-[10px] text-on-surface-variant mt-2 leading-tight">
-            Reach 100% completion before AI timetable generation begins.
-          </p>
+  const SectionHeader = ({ id, icon: Icon, title, description, color }: any) => (
+    <div 
+      className={`flex items-center justify-between p-6 cursor-pointer transition-all ${expandedSection === id ? 'bg-surface border-b border-outline-variant/30' : 'hover:bg-surface-container'}`}
+      onClick={() => toggleSection(id)}
+    >
+      <div className="flex items-center gap-4">
+        <div className={`p-3 rounded-xl bg-${color}/10 text-${color}`}>
+          <Icon size={24} />
+        </div>
+        <div>
+          <h3 className="text-xl font-display font-bold text-on-surface">{title}</h3>
+          <p className="text-sm text-on-surface-variant mt-1">{description}</p>
         </div>
       </div>
+      <div className="text-on-surface-variant">
+        {expandedSection === id ? <ChevronUp size={24} /> : <ChevronDown size={24} />}
+      </div>
+    </div>
+  );
 
-      {/* Main Content Area */}
-      <div className="flex-1 bg-surface-container-lowest/50 backdrop-blur-md border border-outline-variant/30 rounded-3xl p-6 md:p-8 shadow-sm overflow-hidden relative">
-        
-        {/* TAB 1: ACADEMIC DETAILS */}
-        {activeTab === 'academic' && (
-          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div>
-              <h3 className="text-xl font-display font-bold text-on-surface mb-4 flex items-center gap-2">
-                <BookOpen className="text-primary" size={24} /> Subject & Batch Allocation
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-3">
-                  <label className="text-sm font-medium text-on-surface-variant">Theory Subjects (Semester V)</label>
-                  <div className="p-4 bg-surface rounded-xl border border-outline-variant/50 space-y-2">
-                    {['Data Structures & Algorithms', 'Database Management Systems', 'Digital Electronics'].map(sub => (
-                       <label key={sub} className="flex items-center gap-3 cursor-pointer">
-                         <input 
-                           type="checkbox" 
-                           checked={preferences?.academic?.theory?.includes(sub) || false}
-                           onChange={(e) => {
-                              const current = preferences?.academic?.theory || [];
-                              const next = e.target.checked ? [...current, sub] : current.filter((s: string) => s !== sub);
-                              updatePref('academic', 'theory', next);
-                           }}
-                           className="w-4 h-4 rounded border-outline text-primary focus:ring-primary" 
-                         />
-                         <span className="text-sm text-on-surface">{sub}</span>
-                       </label>
-                    ))}
-                  </div>
+  return (
+    <div className="mt-12 space-y-6">
+      
+      <div className="flex items-center gap-3 mb-6">
+        <Sparkles className="text-primary animate-pulse" size={28} />
+        <h2 className="text-3xl font-display font-bold text-on-surface tracking-tight">AI Scheduling Configuration</h2>
+      </div>
+      
+      <p className="text-body-lg text-on-surface-variant max-w-3xl mb-8 leading-relaxed">
+        Complete your academic profile and set your constraints. The <b>SmartSched AI</b> will use these exact settings to generate a conflict-free, highly optimized timetable that respects your preferences.
+      </p>
+
+      {/* 1. ACADEMIC & SUBJECT ALLOCATION */}
+      <div className="bg-surface-container-lowest border border-outline-variant/40 rounded-3xl overflow-hidden shadow-sm transition-all duration-300 hover:shadow-md">
+        <SectionHeader 
+          id="academic" 
+          icon={Layers} 
+          title="Academic & Subject Allocation" 
+          description="Semesters, Departments, Theory, and Practical batches."
+          color="primary"
+        />
+        {expandedSection === 'academic' && (
+          <div className="p-6 md:p-8 space-y-10 animate-in slide-in-from-top-4 fade-in duration-300">
+            
+            {/* Semesters & Depts */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="space-y-4">
+                <label className="text-sm font-bold text-on-surface uppercase tracking-wider">Semester Assignment</label>
+                <div className="grid grid-cols-2 gap-3">
+                  {['Semester I', 'Semester II', 'Semester III', 'Semester IV', 'Semester V', 'Semester VI', 'Semester VII', 'Semester VIII'].map(sem => (
+                    <label key={sem} className="flex items-center gap-3 p-3 bg-surface rounded-xl border border-outline-variant/30 cursor-pointer hover:border-primary/50 transition-colors">
+                      <input 
+                        type="checkbox" 
+                        checked={preferences?.academic?.semesters?.includes(sem) || false}
+                        onChange={(e) => {
+                          const cur = preferences?.academic?.semesters || [];
+                          const next = e.target.checked ? [...cur, sem] : cur.filter((s: string) => s !== sem);
+                          updatePref('academic', 'semesters', next);
+                        }}
+                        className="w-4 h-4 rounded text-primary focus:ring-primary" 
+                      />
+                      <span className="text-sm font-medium">{sem}</span>
+                    </label>
+                  ))}
                 </div>
+              </div>
+
+              <div className="space-y-4">
+                <label className="text-sm font-bold text-on-surface uppercase tracking-wider">Department Assignment</label>
                 <div className="space-y-3">
-                  <label className="text-sm font-medium text-on-surface-variant">Practical Subjects / Labs</label>
-                  <div className="p-4 bg-surface rounded-xl border border-outline-variant/50 space-y-2">
-                    {['DBMS Lab (Batch A, B)', 'Embedded Systems Lab'].map(sub => (
-                       <label key={sub} className="flex items-center gap-3 cursor-pointer">
-                         <input 
-                           type="checkbox" 
-                           checked={preferences?.academic?.practical?.includes(sub) || false}
-                           onChange={(e) => {
-                              const current = preferences?.academic?.practical || [];
-                              const next = e.target.checked ? [...current, sub] : current.filter((s: string) => s !== sub);
-                              updatePref('academic', 'practical', next);
-                           }}
-                           className="w-4 h-4 rounded border-outline text-primary focus:ring-primary" 
-                         />
-                         <span className="text-sm text-on-surface">{sub}</span>
-                       </label>
-                    ))}
-                  </div>
+                  {['Computer Engineering', 'AI & Data Science', 'Information Technology', 'Electronics', 'Mechanical', 'Civil'].map(dept => (
+                    <label key={dept} className="flex items-center gap-3 p-3 bg-surface rounded-xl border border-outline-variant/30 cursor-pointer hover:border-primary/50 transition-colors">
+                      <input 
+                        type="checkbox" 
+                        checked={preferences?.academic?.departments?.includes(dept) || false}
+                        onChange={(e) => {
+                          const cur = preferences?.academic?.departments || [];
+                          const next = e.target.checked ? [...cur, dept] : cur.filter((s: string) => s !== dept);
+                          updatePref('academic', 'departments', next);
+                        }}
+                        className="w-4 h-4 rounded text-primary focus:ring-primary" 
+                      />
+                      <span className="text-sm font-medium">{dept}</span>
+                    </label>
+                  ))}
                 </div>
               </div>
             </div>
 
-            <hr className="border-outline-variant/20" />
+            <hr className="border-outline-variant/30" />
 
-            <div>
-              <h3 className="text-lg font-bold text-on-surface mb-4">Subject Expertise</h3>
+            {/* Subjects */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="space-y-4">
-                {['Artificial Intelligence', 'Machine Learning', 'Python Programming', 'Java', 'Networking'].map((sub, i) => {
-                  const rating = preferences?.academic?.expertise?.[sub] || (5 - (i > 2 ? 1 : 0));
+                <label className="text-sm font-bold text-on-surface uppercase tracking-wider">Theory Subjects (Comma separated)</label>
+                <textarea 
+                  placeholder="e.g. Data Structures, Database Management, Digital Electronics"
+                  value={preferences?.academic?.theory_subjects || ''}
+                  onChange={(e) => updatePref('academic', 'theory_subjects', e.target.value)}
+                  className="w-full p-4 bg-surface rounded-xl border border-outline-variant/50 outline-none focus:border-primary focus:ring-1 focus:ring-primary min-h-[100px] resize-none"
+                />
+              </div>
+              <div className="space-y-4">
+                <label className="text-sm font-bold text-on-surface uppercase tracking-wider">Practical Subjects & Batches</label>
+                <textarea 
+                  placeholder="e.g. DBMS Lab (Batch A, B, C), Embedded Systems Lab (Batch A)"
+                  value={preferences?.academic?.practical_subjects || ''}
+                  onChange={(e) => updatePref('academic', 'practical_subjects', e.target.value)}
+                  className="w-full p-4 bg-surface rounded-xl border border-outline-variant/50 outline-none focus:border-primary focus:ring-1 focus:ring-primary min-h-[100px] resize-none"
+                />
+              </div>
+            </div>
+
+          </div>
+        )}
+      </div>
+
+      {/* 2. AVAILABILITY & CAPACITY */}
+      <div className="bg-surface-container-lowest border border-outline-variant/40 rounded-3xl overflow-hidden shadow-sm transition-all duration-300 hover:shadow-md">
+        <SectionHeader 
+          id="availability" 
+          icon={Clock} 
+          title="Availability & Teaching Capacity" 
+          description="Working days, preferred hours, and workload limits."
+          color="secondary"
+        />
+        {expandedSection === 'availability' && (
+          <div className="p-6 md:p-8 space-y-10 animate-in slide-in-from-top-4 fade-in duration-300">
+            
+            {/* Capacities */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="space-y-2">
+                  <label className="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Max Lectures / Day</label>
+                  <input type="number" value={preferences?.availability?.max_per_day || 4} onChange={(e) => updatePref('availability', 'max_per_day', e.target.value)} className="w-full p-3 bg-surface rounded-xl border border-outline-variant/50 outline-none focus:border-primary" />
+              </div>
+              <div className="space-y-2">
+                  <label className="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Max Lectures / Week</label>
+                  <input type="number" value={preferences?.availability?.max_per_week || 15} onChange={(e) => updatePref('availability', 'max_per_week', e.target.value)} className="w-full p-3 bg-surface rounded-xl border border-outline-variant/50 outline-none focus:border-primary" />
+              </div>
+              <div className="space-y-2">
+                  <label className="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Max Continuous</label>
+                  <input type="number" value={preferences?.availability?.max_continuous || 2} onChange={(e) => updatePref('availability', 'max_continuous', e.target.value)} className="w-full p-3 bg-surface rounded-xl border border-outline-variant/50 outline-none focus:border-primary" />
+              </div>
+            </div>
+
+            <hr className="border-outline-variant/30" />
+
+            {/* Working Days & Preferred Hours */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="space-y-4">
+                <label className="text-sm font-bold text-on-surface uppercase tracking-wider">Working Days</label>
+                <div className="flex flex-wrap gap-3">
+                  {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'].map(day => (
+                    <label key={day} className="flex items-center gap-2 p-2 bg-surface rounded-lg border border-outline-variant/30 cursor-pointer hover:border-primary/50">
+                      <input 
+                        type="checkbox" 
+                        checked={preferences?.availability?.working_days?.includes(day) ?? (day !== 'Saturday')}
+                        onChange={(e) => {
+                          const cur = preferences?.availability?.working_days || ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+                          const next = e.target.checked ? [...cur, day] : cur.filter((d: string) => d !== day);
+                          updatePref('availability', 'working_days', next);
+                        }}
+                        className="w-4 h-4 rounded text-primary" 
+                      />
+                      <span className="text-sm font-medium">{day.substring(0,3)}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <label className="text-sm font-bold text-on-surface uppercase tracking-wider">Preferred Teaching Hours</label>
+                <div className="flex flex-wrap gap-3">
+                  {['Morning (8-12)', 'Afternoon (1-4)', 'Evening (4-6)'].map(time => (
+                    <label key={time} className="flex items-center gap-2 p-2 bg-surface rounded-lg border border-outline-variant/30 cursor-pointer hover:border-primary/50">
+                      <input 
+                        type="checkbox" 
+                        checked={preferences?.availability?.preferred_hours?.includes(time) || false}
+                        onChange={(e) => {
+                          const cur = preferences?.availability?.preferred_hours || [];
+                          const next = e.target.checked ? [...cur, time] : cur.filter((t: string) => t !== time);
+                          updatePref('availability', 'preferred_hours', next);
+                        }}
+                        className="w-4 h-4 rounded text-primary" 
+                      />
+                      <span className="text-sm font-medium">{time}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+          </div>
+        )}
+      </div>
+
+      {/* 3. AI SCHEDULING RULES */}
+      <div className="bg-surface-container-lowest border border-outline-variant/40 rounded-3xl overflow-hidden shadow-sm transition-all duration-300 hover:shadow-md">
+        <SectionHeader 
+          id="rules" 
+          icon={Activity} 
+          title="AI Scheduling Preferences" 
+          description="Soft constraints and specific rules for the AI."
+          color="tertiary"
+        />
+        {expandedSection === 'rules' && (
+          <div className="p-6 md:p-8 space-y-8 animate-in slide-in-from-top-4 fade-in duration-300">
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {[
+                'Avoid first lecture (8:00 AM)', 
+                'Avoid last lecture (4:00 PM)', 
+                'No consecutive practicals',
+                'Maximum two consecutive lectures',
+                'Prefer same classroom for back-to-back',
+                'Avoid Friday afternoon',
+                'Available for substitute lectures',
+                'Auto Accept Substitute Requests'
+              ].map(rule => (
+                <div key={rule} className="flex items-center justify-between p-4 bg-surface rounded-xl border border-outline-variant/30 hover:border-primary/30 transition-colors">
+                  <span className="text-sm font-medium">{rule}</span>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input 
+                      type="checkbox" 
+                      className="sr-only peer" 
+                      checked={preferences?.ai_rules?.[rule] ?? false}
+                      onChange={(e) => {
+                        const cur = preferences?.ai_rules || {};
+                        updatePref('ai_rules', rule, e.target.checked);
+                      }}
+                    />
+                    <div className="w-11 h-6 bg-outline-variant/50 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                  </label>
+                </div>
+              ))}
+            </div>
+
+            <hr className="border-outline-variant/30" />
+
+            <div className="space-y-4">
+              <label className="text-sm font-bold text-on-surface uppercase tracking-wider flex items-center gap-2"><MapPin size={16}/> Classroom Preferences</label>
+              <div className="flex flex-wrap gap-4">
+                {['Smart Classroom Required', 'Projector Required', 'Computer Lab Required', 'Prefer Building A', 'Prefer Building B'].map(pref => (
+                  <label key={pref} className="flex items-center gap-3 p-3 bg-surface rounded-xl border border-outline-variant/30 cursor-pointer hover:border-primary/50 transition-colors">
+                    <input 
+                      type="checkbox" 
+                      checked={preferences?.ai_rules?.classroom_prefs?.includes(pref) || false}
+                      onChange={(e) => {
+                        const cur = preferences?.ai_rules?.classroom_prefs || [];
+                        const next = e.target.checked ? [...cur, pref] : cur.filter((p: string) => p !== pref);
+                        const rules = preferences?.ai_rules || {};
+                        updatePref('ai_rules', 'classroom_prefs', next);
+                      }}
+                      className="w-4 h-4 rounded text-primary focus:ring-primary" 
+                    />
+                    <span className="text-sm font-medium">{pref}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+          </div>
+        )}
+      </div>
+
+      {/* 4. PROFESSIONAL & RESPONSIBILITIES */}
+      <div className="bg-surface-container-lowest border border-outline-variant/40 rounded-3xl overflow-hidden shadow-sm transition-all duration-300 hover:shadow-md">
+        <SectionHeader 
+          id="professional" 
+          icon={Award} 
+          title="Professional & Subject Expertise" 
+          description="Additional duties, research profiles, and skill ratings."
+          color="error"
+        />
+        {expandedSection === 'professional' && (
+          <div className="p-6 md:p-8 space-y-10 animate-in slide-in-from-top-4 fade-in duration-300">
+            
+            <div className="space-y-4">
+              <label className="text-sm font-bold text-on-surface uppercase tracking-wider">Additional Responsibilities</label>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {['Academic Coordinator', 'Placement Coordinator', 'Project Guide', 'Research Coordinator', 'Exam Cell', 'NAAC Coordinator', 'NSS', 'Sports', 'Cultural Committee'].map(duty => (
+                  <label key={duty} className="flex items-center gap-3 p-3 bg-surface rounded-xl border border-outline-variant/30 cursor-pointer hover:border-primary/50 transition-colors">
+                    <input 
+                      type="checkbox" 
+                      checked={preferences?.professional?.duties?.includes(duty) || false}
+                      onChange={(e) => {
+                        const cur = preferences?.professional?.duties || [];
+                        const next = e.target.checked ? [...cur, duty] : cur.filter((d: string) => d !== duty);
+                        updatePref('professional', 'duties', next);
+                      }}
+                      className="w-4 h-4 rounded text-primary focus:ring-primary" 
+                    />
+                    <span className="text-sm font-medium">{duty}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            <hr className="border-outline-variant/30" />
+
+            <div className="space-y-4">
+              <label className="text-sm font-bold text-on-surface uppercase tracking-wider">Subject Expertise (1 to 5 Stars)</label>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {['Artificial Intelligence', 'Machine Learning', 'Python', 'Java', 'Networking'].map((sub, i) => {
+                  const rating = preferences?.professional?.expertise?.[sub] || 0;
                   return (
-                    <div key={sub} className="flex items-center justify-between p-3 bg-surface rounded-lg border border-outline-variant/30">
+                    <div key={sub} className="flex items-center justify-between p-4 bg-surface rounded-xl border border-outline-variant/30">
                       <span className="text-sm font-medium text-on-surface">{sub}</span>
                       <div className="flex gap-1 text-primary">
                         {[1,2,3,4,5].map(star => (
                           <Award 
                             key={star} 
-                            size={16} 
-                            className={`cursor-pointer transition-colors ${star <= rating ? 'fill-primary' : 'fill-transparent opacity-30 hover:opacity-50'}`} 
+                            size={20} 
+                            className={`cursor-pointer transition-colors hover:opacity-80 ${star <= rating ? 'fill-primary' : 'fill-transparent opacity-20'}`} 
                             onClick={() => {
-                               const exp = preferences?.academic?.expertise || {};
-                               updatePref('academic', 'expertise', { ...exp, [sub]: star });
+                               const exp = preferences?.professional?.expertise || {};
+                               updatePref('professional', 'expertise', { ...exp, [sub]: star });
                             }}
                           />
                         ))}
@@ -152,173 +351,22 @@ export function FacultyExtendedProfile({ preferences = {}, onChange }: FacultyEx
                 })}
               </div>
             </div>
-          </div>
-        )}
-
-        {/* TAB 2: AVAILABILITY */}
-        {activeTab === 'availability' && (
-          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-             <div>
-              <h3 className="text-xl font-display font-bold text-on-surface mb-4 flex items-center gap-2">
-                <Clock className="text-primary" size={24} /> Schedule Constraints
-              </h3>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                <div className="space-y-2">
-                    <label className="text-sm font-medium text-on-surface-variant">Max Lectures Per Day</label>
-                    <input 
-                      type="number" 
-                      value={preferences?.availability?.maxLecturesPerDay || 4} 
-                      onChange={(e) => updatePref('availability', 'maxLecturesPerDay', parseInt(e.target.value))}
-                      className="w-full p-3 bg-surface rounded-xl border border-outline-variant/50 outline-none focus:border-primary focus:ring-1 focus:ring-primary" 
-                    />
-                </div>
-                <div className="space-y-2">
-                    <label className="text-sm font-medium text-on-surface-variant">Max Continuous Lectures</label>
-                    <input 
-                      type="number" 
-                      value={preferences?.availability?.maxContinuous || 2} 
-                      onChange={(e) => updatePref('availability', 'maxContinuous', parseInt(e.target.value))}
-                      className="w-full p-3 bg-surface rounded-xl border border-outline-variant/50 outline-none focus:border-primary focus:ring-1 focus:ring-primary" 
-                    />
-                </div>
-              </div>
-
-              <label className="text-sm font-medium text-on-surface-variant mb-3 block">Weekly Availability Calendar</label>
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm text-left border-collapse">
-                  <thead className="bg-surface text-on-surface-variant">
-                    <tr>
-                      <th className="p-3 border border-outline-variant/30 rounded-tl-xl">Time</th>
-                      <th className="p-3 border border-outline-variant/30">Mon</th>
-                      <th className="p-3 border border-outline-variant/30">Tue</th>
-                      <th className="p-3 border border-outline-variant/30">Wed</th>
-                      <th className="p-3 border border-outline-variant/30">Thu</th>
-                      <th className="p-3 border border-outline-variant/30 rounded-tr-xl">Fri</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {['08:00 - 09:00', '09:00 - 10:00', '10:00 - 11:00'].map(time => (
-                      <tr key={time}>
-                        <td className="p-3 border border-outline-variant/30 font-medium bg-surface/30">{time}</td>
-                        {[1,2,3,4,5].map(day => {
-                           const key = `${day}-${time}`;
-                           const isBusy = preferences?.availability?.calendar?.[key] || (day === 2 && time.startsWith('08'));
-                           return (
-                             <td key={day} className="p-3 border border-outline-variant/30 text-center">
-                               <button 
-                                 onClick={() => {
-                                    const cal = preferences?.availability?.calendar || {};
-                                    updatePref('availability', 'calendar', { ...cal, [key]: !isBusy });
-                                 }}
-                                 className={`w-full py-1.5 rounded-md text-xs font-semibold transition-colors ${isBusy ? 'bg-error/10 text-error hover:bg-error/20' : 'bg-success/10 text-success hover:bg-success/20'}`}
-                               >
-                                 {isBusy ? 'Busy' : 'Available'}
-                               </button>
-                             </td>
-                           );
-                        })}
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* TAB 3: DUTIES */}
-        {activeTab === 'responsibilities' && (
-          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-             <div>
-              <h3 className="text-xl font-display font-bold text-on-surface mb-4 flex items-center gap-2">
-                <Briefcase className="text-primary" size={24} /> Additional Responsibilities
-              </h3>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                {['Academic Coordinator', 'Placement Coordinator', 'Project Guide', 'Research Coordinator', 'Exam Cell', 'NAAC Coordinator'].map(duty => (
-                  <label key={duty} className="flex items-center gap-3 p-3 bg-surface rounded-xl border border-outline-variant/30 cursor-pointer hover:border-primary/50 transition-colors">
-                    <input 
-                      type="checkbox" 
-                      checked={preferences?.duties?.list?.includes(duty) || duty === 'Project Guide'}
-                      onChange={(e) => {
-                         const current = preferences?.duties?.list || ['Project Guide'];
-                         const next = e.target.checked ? [...current, duty] : current.filter((d: string) => d !== duty);
-                         updatePref('duties', 'list', next);
-                      }}
-                      className="w-4 h-4 rounded border-outline text-primary focus:ring-primary" 
-                    />
-                    <span className="text-sm font-medium">{duty}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
             
-            <hr className="border-outline-variant/20" />
-
-            <div>
-              <h3 className="text-xl font-display font-bold text-on-surface mb-4">AI Performance Metrics</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="p-4 bg-surface rounded-xl border border-outline-variant/30 flex items-center justify-between">
-                  <div>
-                    <p className="text-xs text-on-surface-variant uppercase tracking-wider mb-1">Lecture Completion Rate</p>
-                    <p className="text-2xl font-bold text-on-surface">94.2%</p>
-                  </div>
-                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary"><CheckCircle2 size={24}/></div>
-                </div>
-                <div className="p-4 bg-surface rounded-xl border border-outline-variant/30 flex items-center justify-between">
-                  <div>
-                    <p className="text-xs text-on-surface-variant uppercase tracking-wider mb-1">Student Feedback</p>
-                    <p className="text-2xl font-bold text-on-surface">4.8/5.0</p>
-                  </div>
-                  <div className="w-12 h-12 rounded-full bg-secondary/10 flex items-center justify-center text-secondary"><Award size={24}/></div>
-                </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+               <div className="space-y-2">
+                  <label className="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Google Scholar Profile Link</label>
+                  <input type="url" placeholder="https://scholar.google.com/..." value={preferences?.professional?.scholar || ''} onChange={(e) => updatePref('professional', 'scholar', e.target.value)} className="w-full p-3 bg-surface rounded-xl border border-outline-variant/50 outline-none focus:border-primary" />
+              </div>
+              <div className="space-y-2">
+                  <label className="text-xs font-bold text-on-surface-variant uppercase tracking-wider">ORCID ID</label>
+                  <input type="text" placeholder="0000-0000-0000-0000" value={preferences?.professional?.orcid || ''} onChange={(e) => updatePref('professional', 'orcid', e.target.value)} className="w-full p-3 bg-surface rounded-xl border border-outline-variant/50 outline-none focus:border-primary" />
               </div>
             </div>
-          </div>
-        )}
 
-        {/* TAB 4: AI PREFERENCES */}
-        {activeTab === 'preferences' && (
-          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-             <div>
-              <h3 className="text-xl font-display font-bold text-on-surface mb-4 flex items-center gap-2">
-                <Activity className="text-primary" size={24} /> AI Scheduling Rules
-              </h3>
-              <p className="text-sm text-on-surface-variant mb-6">These rules act as soft constraints for the SmartSched AI algorithm during generation.</p>
-              
-              <div className="space-y-3">
-                {[
-                  'Avoid first lecture (8:00 AM)', 
-                  'Avoid last lecture (4:00 PM)', 
-                  'No consecutive practicals',
-                  'Prefer morning theory sessions',
-                  'Prefer same classroom for back-to-back',
-                  'Auto Accept Substitute Requests'
-                ].map(pref => {
-                   const isChecked = preferences?.ai_rules?.[pref] ?? (pref.includes('morning') || pref.includes('classroom'));
-                   return (
-                     <div key={pref} className="flex items-center justify-between p-4 bg-surface rounded-xl border border-outline-variant/30">
-                       <span className="text-sm font-medium">{pref}</span>
-                       <label className="relative inline-flex items-center cursor-pointer">
-                         <input 
-                           type="checkbox" 
-                           className="sr-only peer" 
-                           checked={isChecked}
-                           onChange={(e) => {
-                              const rules = preferences?.ai_rules || {};
-                              updatePref('ai_rules', pref, e.target.checked);
-                           }}
-                         />
-                         <div className="w-11 h-6 bg-outline-variant/50 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
-                       </label>
-                     </div>
-                   );
-                })}
-              </div>
-            </div>
           </div>
         )}
       </div>
+
     </div>
   );
 }

@@ -154,15 +154,15 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          {/* FACULTY / ADMIN SPECIFIC DETAILS */}
-          {(localRole === 'faculty' || localRole === 'admin') && (
+          {/* FACULTY SPECIFIC DETAILS */}
+          {localRole === 'faculty' && (
             <div className="profile-card bg-surface/60 backdrop-blur-xl border border-outline-variant/30 rounded-3xl p-xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col gap-md relative overflow-hidden">
                 <div className="flex items-center gap-3 mb-2">
                     <div className="w-10 h-10 rounded-xl bg-secondary/10 flex items-center justify-center text-secondary">
                         <Briefcase size={20} />
                     </div>
                     <h2 className="font-headline-sm text-headline-sm font-semibold">
-                      {localRole === 'admin' ? 'Admin / Staff Information' : 'Staff Information'}
+                      Staff Information
                     </h2>
                 </div>
 
@@ -252,7 +252,7 @@ export default function ProfilePage() {
             </div>
           )}
           {/* EXTENDED FACULTY CONFIGURATION */}
-          {(localRole === 'faculty' || localRole === 'admin') && (
+          {localRole === 'faculty' && (
             <FacultyExtendedProfile 
               preferences={extendedPreferences} 
               onChange={setExtendedPreferences} 
