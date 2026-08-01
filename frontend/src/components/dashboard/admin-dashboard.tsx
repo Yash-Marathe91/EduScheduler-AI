@@ -5,7 +5,8 @@ import {
   Building2, Users, GraduationCap, BookOpen, Calendar, MapPin, 
   Sparkles, CheckCircle2, Clock, AlertTriangle, Play, CalendarPlus,
   FileText, Upload, Plus, BarChart3, TrendingUp, Cpu, Server,
-  Search, Filter, Send, Bot, Check, ArrowRight
+  Search, Filter, Send, Bot, Check, ArrowRight, AlertOctagon, 
+  MessageSquare, CalendarDays, Activity, FileBarChart, BellRing, X
 } from 'lucide-react';
 import gsap from 'gsap';
 
@@ -405,6 +406,182 @@ export function AdminDashboard() {
 
         </div>
       </div>
+
+      {/* --- PHASE 3 START --- */}
+      
+      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8 pt-4">
+        
+        {/* CONFLICT CENTER & CLASSROOM MONITOR */}
+        <div className="xl:col-span-2 space-y-8">
+          
+          {/* CONFLICT CENTER */}
+          <div className="bg-error/5 border border-error/20 rounded-3xl p-6 md:p-8 shadow-sm relative overflow-hidden">
+            <div className="absolute top-0 right-0 p-4 opacity-5 text-error">
+              <AlertOctagon size={120} />
+            </div>
+            
+            <div className="relative z-10">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-xl font-bold text-on-surface flex items-center gap-2"><AlertOctagon size={22} className="text-error"/> Conflict Center</h3>
+                <span className="bg-error text-white text-xs font-bold px-3 py-1 rounded-full animate-pulse">3 Live Issues</span>
+              </div>
+
+              <div className="space-y-3">
+                {[
+                  { title: 'Faculty Overlap', desc: 'Dr. Patel scheduled in Room 304 and Lab 2 simultaneously at 11:00 AM.', type: 'Critical', color: 'border-error/50 bg-error/10 text-error' },
+                  { title: 'Room Double-Booking', desc: 'Smart Class 1 is assigned to CSE-V and ECE-VII at 02:00 PM.', type: 'Critical', color: 'border-error/50 bg-error/10 text-error' },
+                  { title: 'Credit Mismatch', desc: 'Semester III Physics is short by 1 practical session this week.', type: 'Warning', color: 'border-tertiary/50 bg-tertiary/10 text-tertiary' },
+                ].map((conflict, i) => (
+                  <div key={i} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-xl border border-outline-variant/50 bg-surface/80 backdrop-blur-sm hover:shadow-sm transition-all gap-4">
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded-full border ${conflict.color}`}>{conflict.type}</span>
+                        <h4 className="font-bold text-sm text-on-surface">{conflict.title}</h4>
+                      </div>
+                      <p className="text-xs text-on-surface-variant leading-snug">{conflict.desc}</p>
+                    </div>
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      <button className="text-xs bg-primary text-on-primary px-3 py-1.5 rounded-lg font-bold hover:bg-primary/90 transition-colors flex items-center gap-1">
+                        <Sparkles size={14}/> AI Resolve
+                      </button>
+                      <button className="text-xs bg-surface-container text-on-surface-variant border border-outline-variant px-3 py-1.5 rounded-lg hover:bg-outline-variant/20 transition-colors">
+                        Manual Fix
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* CLASSROOM MONITOR */}
+          <div className="bg-surface border border-outline-variant/30 rounded-3xl p-6 md:p-8 shadow-sm">
+             <div className="flex items-center justify-between mb-6">
+                <h3 className="text-xl font-bold text-on-surface flex items-center gap-2"><MapPin size={22} className="text-secondary"/> Classroom & Lab Monitor</h3>
+                <button className="text-xs bg-surface-container border border-outline-variant px-3 py-1.5 rounded-lg font-medium hover:bg-outline-variant/20 transition-colors">
+                  Assign Room
+                </button>
+             </div>
+
+             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                <div className="p-4 rounded-xl border border-outline-variant/30 bg-surface-container">
+                  <p className="text-xs text-on-surface-variant uppercase mb-1">Available</p>
+                  <p className="text-2xl font-bold text-success">14</p>
+                </div>
+                <div className="p-4 rounded-xl border border-outline-variant/30 bg-surface-container">
+                  <p className="text-xs text-on-surface-variant uppercase mb-1">Occupied</p>
+                  <p className="text-2xl font-bold text-primary">28</p>
+                </div>
+                <div className="p-4 rounded-xl border border-outline-variant/30 bg-surface-container">
+                  <p className="text-xs text-on-surface-variant uppercase mb-1">Labs in Use</p>
+                  <p className="text-2xl font-bold text-secondary">8</p>
+                </div>
+                <div className="p-4 rounded-xl border border-outline-variant/30 bg-surface-container">
+                  <p className="text-xs text-on-surface-variant uppercase mb-1">Maintenance</p>
+                  <p className="text-2xl font-bold text-error">2</p>
+                </div>
+             </div>
+
+             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+               {[
+                 { name: 'Room 301', status: 'Occupied', color: 'bg-primary/10 border-primary/30 text-primary' },
+                 { name: 'Room 302', status: 'Available', color: 'bg-success/10 border-success/30 text-success' },
+                 { name: 'Room 303', status: 'Occupied', color: 'bg-primary/10 border-primary/30 text-primary' },
+                 { name: 'Room 304', status: 'Available', color: 'bg-success/10 border-success/30 text-success' },
+                 { name: 'Lab 1', status: 'Occupied', color: 'bg-secondary/10 border-secondary/30 text-secondary' },
+                 { name: 'Lab 2', status: 'Maintenance', color: 'bg-error/10 border-error/30 text-error' },
+                 { name: 'Smart Class', status: 'Occupied', color: 'bg-primary/10 border-primary/30 text-primary' },
+                 { name: 'Auditorium', status: 'Available', color: 'bg-success/10 border-success/30 text-success' },
+               ].map((room, i) => (
+                 <div key={i} className={`p-3 rounded-xl border flex flex-col items-center justify-center text-center ${room.color}`}>
+                   <p className="font-bold text-sm">{room.name}</p>
+                   <p className="text-[10px] uppercase font-bold opacity-80 mt-1">{room.status}</p>
+                 </div>
+               ))}
+             </div>
+          </div>
+
+        </div>
+
+        {/* RIGHT COLUMN: LEAVE & NOTICES */}
+        <div className="space-y-8">
+          
+          {/* LEAVE MANAGEMENT */}
+          <div className="bg-surface border border-outline-variant/30 rounded-3xl p-6 shadow-sm">
+            <h3 className="text-xl font-bold text-on-surface flex items-center gap-2 mb-6"><CalendarDays size={22} className="text-tertiary"/> Leave Management</h3>
+            
+            <div className="flex justify-between items-center bg-tertiary/10 border border-tertiary/20 p-4 rounded-xl mb-4">
+              <div>
+                <p className="text-xs font-bold text-tertiary uppercase">Pending Requests</p>
+                <p className="text-2xl font-bold text-on-surface">3</p>
+              </div>
+              <button className="text-xs bg-tertiary text-white px-3 py-1.5 rounded-lg font-bold hover:bg-tertiary/90 transition-colors">
+                Review All
+              </button>
+            </div>
+
+            <div className="space-y-3">
+               {[
+                 { name: 'Prof. Raj Verma', type: 'Sick Leave', date: 'Oct 15 - Oct 16' },
+                 { name: 'Dr. Anita Sharma', type: 'Casual Leave', date: 'Oct 18' },
+               ].map((req, i) => (
+                 <div key={i} className="p-3 border border-outline-variant/50 rounded-xl hover:bg-surface-container/50 transition-colors">
+                   <p className="text-sm font-bold text-on-surface">{req.name}</p>
+                   <div className="flex justify-between text-xs text-on-surface-variant mt-1">
+                     <span>{req.type}</span>
+                     <span>{req.date}</span>
+                   </div>
+                   <div className="flex gap-2 mt-3">
+                     <button className="flex-1 flex items-center justify-center gap-1 text-xs bg-success/10 text-success border border-success/20 py-1.5 rounded-md font-bold hover:bg-success/20 transition-colors">
+                       <Check size={14}/> Approve
+                     </button>
+                     <button className="flex-1 flex items-center justify-center gap-1 text-xs bg-error/10 text-error border border-error/20 py-1.5 rounded-md font-bold hover:bg-error/20 transition-colors">
+                       <X size={14}/> Reject
+                     </button>
+                   </div>
+                 </div>
+               ))}
+            </div>
+          </div>
+
+          {/* NOTICES & COMMUNICATION */}
+          <div className="bg-surface border border-outline-variant/30 rounded-3xl p-6 shadow-sm">
+            <div className="flex items-center justify-between mb-6">
+               <h3 className="text-xl font-bold text-on-surface flex items-center gap-2"><BellRing size={22} className="text-primary"/> Notices</h3>
+               <button className="p-2 bg-primary/10 text-primary rounded-lg hover:bg-primary/20 transition-colors">
+                 <Plus size={16}/>
+               </button>
+            </div>
+            
+            <div className="space-y-4">
+               {[
+                 { title: 'Mid-Semester Exam Schedule', target: 'All Students', time: '2 hours ago' },
+                 { title: 'Faculty Meeting (Department)', target: 'CSE Faculty', time: '5 hours ago' },
+                 { title: 'Holiday Announcement', target: 'Everyone', time: '1 day ago' },
+               ].map((notice, i) => (
+                 <div key={i} className="flex gap-3 relative before:absolute before:left-[11px] before:top-8 before:bottom-[-16px] before:w-[2px] before:bg-outline-variant/30 last:before:hidden">
+                   <div className="w-6 h-6 rounded-full bg-primary/20 flex flex-shrink-0 items-center justify-center text-primary z-10 ring-4 ring-surface">
+                     <MessageSquare size={12}/>
+                   </div>
+                   <div className="pb-4">
+                     <p className="text-sm font-bold text-on-surface">{notice.title}</p>
+                     <div className="flex items-center gap-2 mt-1">
+                       <span className="text-[10px] font-bold uppercase bg-surface-container px-2 py-0.5 rounded-md text-on-surface-variant">{notice.target}</span>
+                       <span className="text-[10px] text-on-surface-variant">{notice.time}</span>
+                     </div>
+                   </div>
+                 </div>
+               ))}
+            </div>
+            
+            <button className="w-full mt-2 py-2 border-2 border-dashed border-outline-variant/50 rounded-xl text-sm font-bold text-on-surface-variant hover:text-primary hover:border-primary/50 transition-colors">
+              Broadcast New Notice
+            </button>
+          </div>
+
+        </div>
+      </div>
+
     </div>
   );
 }
