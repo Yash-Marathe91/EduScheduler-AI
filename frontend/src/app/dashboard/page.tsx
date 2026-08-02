@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { AdminDashboard } from '@/components/dashboard/admin-dashboard';
+import { StudentDashboard } from '@/components/dashboard/student-dashboard';
 
 export default function DashboardPage() {
   const [localRole, setLocalRole] = useState<string>('student');
@@ -26,12 +27,7 @@ export default function DashboardPage() {
         </div>
       )}
       
-      {localRole === 'student' && (
-        <div className="p-8">
-          <h2 className="text-3xl font-bold tracking-tight text-on-surface">Student Dashboard</h2>
-          <p className="text-on-surface-variant mt-2">Welcome to the student portal. Your timetable is loading...</p>
-        </div>
-      )}
+      {localRole === 'student' && <StudentDashboard />}
     </div>
   );
 }
