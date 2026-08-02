@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-export function middleware(request: NextRequest) {
+export default function proxy(request: NextRequest) {
   // Get token from cookies or authorization header.
   // Note: Since this is a client-side localStorage implementation for now,
   // robust SSR protection usually requires setting an HTTP-only cookie on login.
