@@ -6,9 +6,10 @@ import { useState, useEffect } from "react";
 import { PageTransition } from "@/components/layout/page-transition";
 import { ChatAssistant } from "@/components/ai/chat-assistant";
 import { NotificationDropdown } from "@/components/notifications/notification-dropdown";
+import { useAuth } from "@/contexts/auth-context";
 import { 
   LayoutDashboard, Calendar, Building2, GraduationCap, Settings, Bell, Moon, User, FileText,
-  Home, Sparkles, Search, ChevronLeft, ChevronRight
+  Home, Sparkles, Search, ChevronLeft, ChevronRight, LogOut
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -18,14 +19,8 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const [role, setRole] = useState<string | null>(null);
+  const { role, logout } = useAuth();
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      setRole(localStorage.getItem("userRole") || "admin");
-    }
-  }, []);
 
   const allNavItems = [
     { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard", roles: ["admin", "faculty", "student"] },
@@ -124,6 +119,24 @@ export default function DashboardLayout({
             </button>
           </div>
         )}
+
+        <div className="px-2 pb-6 mt-auto">
+          <button 
+            onClick={logout}
+            className={cn(
+              "group flex items-center rounded-xl transition-all duration-300 ease-out text-error hover:bg-error/10",
+              isSidebarCollapsed ? "p-3 justify-center mx-auto" : "gap-sm p-3 w-full"
+            )}
+            title={isSidebarCollapsed ? "Log Out" : undefined}
+          >
+            <LogOut size={20} className="transition-transform duration-300 ease-out flex-shrink-0 opacity-80 group-hover:opacity-100" />
+            {!isSidebarCollapsed && (
+              <span className="font-label-md text-label-md tracking-wide truncate overflow-hidden transition-all duration-300 font-medium">
+                Log Out
+              </span>
+            )}
+          </button>
+        </div>
       </nav>
 
       {/* Main Content Area */}

@@ -1,38 +1,33 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import { AdminDashboard } from '@/components/dashboard/admin-dashboard';
 import { StudentDashboard } from '@/components/dashboard/student-dashboard';
+import { useAuth } from '@/contexts/auth-context';
+import { Loader2 } from 'lucide-react';
 
 export default function DashboardPage() {
-  const [localRole, setLocalRole] = useState<string>('student');
-  const [isMounted, setIsMounted] = useState(false);
+  const { role, isLoading } = useAuth();
 
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      window.location.href = '/auth/login';
-      return;
-    }
-    setLocalRole(localStorage.getItem('userRole') || 'student');
-    setIsMounted(true);
-  }, []);
-
-  if (!isMounted) return null; // Avoid hydration mismatch
+  if (isLoading) {
+    return (
+      <div className="w-full h-screen flex items-center justify-center">
+        <Loader2 className="animate-spin text-primary" size={32} />
+      </div>
+    );
+  }
 
   return (
     <div className="w-full">
-      {localRole === 'admin' && <AdminDashboard />}
+      {role === 'admin' && <AdminDashboard />}
       
-      {/* Placeholders for Faculty and Student dashboards */}
-      {localRole === 'faculty' && (
+      {role === 'faculty' && (
         <div className="p-8">
           <h2 className="text-3xl font-bold tracking-tight text-on-surface">Faculty Dashboard</h2>
           <p className="text-on-surface-variant mt-2">Welcome to the faculty portal. Check your schedule below.</p>
         </div>
       )}
       
-      {localRole === 'student' && <StudentDashboard />}
+      {(role === 'student' || role === null) && <StudentDashboard />}
     </div>
   );
 }

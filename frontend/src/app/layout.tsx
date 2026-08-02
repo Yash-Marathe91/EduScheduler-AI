@@ -5,6 +5,7 @@ import { QueryProvider } from "@/providers/query-provider";
 
 export const dynamic = "force-dynamic";
 import { PremiumBackground } from "@/components/layout/premium-background";
+import { AuthProvider } from "@/contexts/auth-context";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -27,9 +28,11 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col relative text-on-background bg-background">
         <PremiumBackground />
-        <QueryProvider>
-          {children}
-        </QueryProvider>
+        <AuthProvider>
+          <QueryProvider>
+            {children}
+          </QueryProvider>
+        </AuthProvider>
       </body>
     </html>
   );
