@@ -9,6 +9,11 @@ export default function DashboardPage() {
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      window.location.href = '/auth/login';
+      return;
+    }
     setLocalRole(localStorage.getItem('userRole') || 'student');
     setIsMounted(true);
   }, []);

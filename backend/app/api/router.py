@@ -16,3 +16,6 @@ api_router.include_router(semesters.router, prefix="/semesters", tags=["semester
 api_router.include_router(ai_chat.router, prefix="/ai/chat", tags=["ai"])
 api_router.include_router(attendance.router, prefix="/attendance", tags=["attendance"])
 api_router.include_router(notifications.router, prefix="/notifications", tags=["notifications"])
+
+from app.api.endpoints import auth
+api_router.include_router(auth.router, prefix="/auth", tags=["auth"])

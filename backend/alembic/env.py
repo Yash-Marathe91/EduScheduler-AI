@@ -30,7 +30,7 @@ def get_url():
     url = os.getenv("DATABASE_URL")
     if not url:
         raise ValueError("DATABASE_URL not set in .env")
-    return url
+    return url.replace("%", "%%")
 
 config.set_main_option("sqlalchemy.url", get_url())
 

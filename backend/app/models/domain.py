@@ -90,9 +90,10 @@ class TimetableSlot(Base):
 class Profile(Base):
     __tablename__ = "profiles"
 
-    id = Column(UUID(as_uuid=True), primary_key=True) # Matches auth.users.id
-    email = Column(String(255), unique=True, nullable=False)
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    email = Column(String(255), unique=True, nullable=False, index=True)
     full_name = Column(String(255), nullable=True)
+    hashed_password = Column(String(255), nullable=True) # Added for local auth
     role = Column(String(50), default="student")
     
 class FacultyDetails(Base):
