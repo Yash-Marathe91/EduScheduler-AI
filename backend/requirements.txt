@@ -19,3 +19,5 @@ google-generativeai
 pillow
 python-multipart
 langchain-google-genai
+passlib[bcrypt]
+PyJWT
