@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import { 
   Building2, Users, GraduationCap, BookOpen, Calendar, MapPin, 
+  Sparkles, CheckCircle2, Clock, AlertTriangle, Play, CalendarPlus,
+  FileText, Upload, Plus, BarChart3, TrendingUp, Cpu, Server,
   Search, Filter, Send, Bot, Check, ArrowRight, AlertOctagon, 
   MessageSquare, CalendarDays, Activity, FileBarChart, BellRing, X,
   Database, Wifi, HardDrive, History, PieChart, Download, ShieldCheck, BarChart2
