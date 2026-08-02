@@ -5,7 +5,8 @@ import {
   Calendar, Clock, BookOpen, MapPin, Bell, Play,
   Users, CheckCircle2, ArrowRight, GraduationCap, Building2,
   CalendarDays, Filter, Search, MonitorPlay, Projector, Beaker,
-  Info, ShieldCheck, LayoutTemplate
+  Info, ShieldCheck, LayoutTemplate, Megaphone, FileText, Download,
+  Target, Award, ListChecks, PieChart, Star, Mail, Briefcase
 } from 'lucide-react';
 import gsap from 'gsap';
 
@@ -306,6 +307,151 @@ export function StudentDashboard() {
 
         </div>
       </div>
+
+      {/* --- PHASE 3 START --- */}
+      
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 pt-4">
+        
+        {/* LEFT COLUMN: INFORMATION HUB (Notices & Calendar) */}
+        <div className="xl:col-span-2 space-y-8">
+          
+          {/* NOTICE BOARD */}
+          <div className="bg-surface border border-outline-variant/30 rounded-3xl p-6 md:p-8 shadow-sm">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold text-on-surface flex items-center gap-2"><Megaphone size={22} className="text-error"/> Notice Board</h3>
+              <button className="text-sm font-bold text-primary hover:underline">View All</button>
+            </div>
+            
+            <div className="space-y-4">
+              {[
+                { title: 'Mid-Semester Examination Schedule', src: 'Exam Department', date: 'Oct 15', prio: 'High', color: 'border-error/50 bg-error/5' },
+                { title: 'Guest Lecture on AI & Robotics', src: 'CSE Department', date: 'Oct 12', prio: 'Normal', color: 'border-outline-variant/50 bg-surface-container' },
+                { title: 'Campus Placement Drive: TechCorp', src: 'Placement Cell', date: 'Oct 10', prio: 'High', color: 'border-tertiary/50 bg-tertiary/5' },
+              ].map((notice, i) => (
+                <div key={i} className={`p-4 border rounded-2xl flex flex-col md:flex-row gap-4 items-start md:items-center justify-between hover:shadow-md transition-shadow cursor-pointer ${notice.color}`}>
+                  <div className="flex gap-4">
+                    <div className="mt-1">
+                      {notice.prio === 'High' ? <Star size={20} className="text-error fill-error"/> : <FileText size={20} className="text-on-surface-variant"/>}
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-bold text-on-surface leading-tight">{notice.title}</h4>
+                      <div className="flex items-center gap-3 mt-1.5 text-xs font-medium text-on-surface-variant">
+                        <span>{notice.src}</span>
+                        <span className="w-1 h-1 rounded-full bg-outline-variant"></span>
+                        <span>{notice.date}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <button className="text-xs flex items-center gap-1.5 bg-surface px-3 py-1.5 rounded-lg border border-outline-variant/30 font-bold text-on-surface-variant hover:bg-surface-container transition-colors shrink-0">
+                    <Download size={14}/> Attachment
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* ACADEMIC CALENDAR & EVENTS */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="bg-surface border border-outline-variant/30 rounded-3xl p-6 shadow-sm">
+              <h3 className="text-lg font-bold text-on-surface flex items-center gap-2 mb-6"><Target size={20} className="text-secondary"/> Upcoming Events</h3>
+              <div className="space-y-6 relative before:absolute before:inset-0 before:ml-3.5 before:-translate-x-px before:h-full before:w-0.5 before:bg-outline-variant/30">
+                {[
+                  { date: '20 Oct', title: 'CodeSprint Hackathon', type: 'Tech' },
+                  { date: '25 Oct', title: 'Industrial Visit (TCS)', type: 'Visit' },
+                  { date: '01 Nov', title: 'Diwali Holidays Begin', type: 'Holiday' },
+                ].map((ev, i) => (
+                  <div key={i} className="relative flex items-start gap-4">
+                    <div className="w-7 h-7 rounded-full bg-surface border-2 border-secondary flex items-center justify-center z-10 shrink-0 mt-0.5">
+                      <div className="w-2.5 h-2.5 rounded-full bg-secondary"></div>
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-on-surface">{ev.title}</p>
+                      <p className="text-xs text-on-surface-variant font-medium mt-0.5">{ev.date} • {ev.type}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="bg-surface border border-outline-variant/30 rounded-3xl p-6 shadow-sm">
+              <h3 className="text-lg font-bold text-on-surface flex items-center gap-2 mb-6"><PieChart size={20} className="text-primary"/> Attendance Summary</h3>
+              <div className="flex items-center justify-center mb-4">
+                <div className="relative w-32 h-32 flex items-center justify-center rounded-full border-[12px] border-primary/20">
+                  <div className="absolute inset-0 rounded-full border-[12px] border-primary" style={{ clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%, 0 25%)' }}></div>
+                  <div className="text-center">
+                    <span className="text-3xl font-bold text-on-surface">82<span className="text-lg">%</span></span>
+                  </div>
+                </div>
+              </div>
+              <p className="text-center text-sm font-medium text-on-surface">Overall Attendance</p>
+              <p className="text-center text-xs text-on-surface-variant mt-1">104 / 126 Lectures Attended</p>
+            </div>
+          </div>
+
+        </div>
+
+        {/* RIGHT COLUMN: ACADEMICS & DIRECTORY */}
+        <div className="space-y-8">
+          
+          {/* SUBJECT DETAILS */}
+          <div className="bg-surface border border-outline-variant/30 rounded-3xl p-6 shadow-sm">
+            <h3 className="text-lg font-bold text-on-surface flex items-center gap-2 mb-6"><BookOpen size={20} className="text-tertiary"/> Subjects (Semester V)</h3>
+            <div className="space-y-3">
+              {[
+                { code: 'CS301', name: 'Software Engineering', credits: '4' },
+                { code: 'CS302', name: 'Database Mgmt Systems', credits: '4' },
+                { code: 'CS303', name: 'Computer Networks', credits: '3' },
+                { code: 'CS304', name: 'Theory of Computation', credits: '4' },
+              ].map((sub, i) => (
+                <div key={i} className="p-3 border border-outline-variant/30 rounded-xl bg-surface-container-lowest flex justify-between items-center">
+                  <div>
+                    <p className="text-xs font-bold text-tertiary">{sub.code}</p>
+                    <p className="text-sm font-bold text-on-surface leading-tight mt-0.5">{sub.name}</p>
+                  </div>
+                  <span className="bg-tertiary/10 text-tertiary text-xs font-bold px-2.5 py-1 rounded-md">{sub.credits} Cr</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* FACULTY DIRECTORY (Read-Only) */}
+          <div className="bg-surface border border-outline-variant/30 rounded-3xl p-6 shadow-sm">
+            <h3 className="text-lg font-bold text-on-surface flex items-center gap-2 mb-6"><Briefcase size={20} className="text-primary"/> Faculty Directory</h3>
+            <div className="space-y-4">
+              {[
+                { name: 'Dr. Suresh Patel', sub: 'DBMS', cabin: 'Block A, 204' },
+                { name: 'Prof. Ramesh Kumar', sub: 'Software Engineering', cabin: 'Block B, 105' },
+              ].map((fac, i) => (
+                <div key={i} className="flex gap-3">
+                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0 border border-primary/20">
+                    <Users size={18}/>
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-bold text-on-surface">{fac.name}</p>
+                    <p className="text-xs text-on-surface-variant">{fac.sub}</p>
+                    <div className="flex items-center gap-2 mt-2">
+                      <span className="text-[10px] bg-surface-container px-2 py-0.5 rounded-full flex items-center gap-1 font-medium"><MapPin size={10}/> {fac.cabin}</span>
+                      <span className="text-[10px] bg-surface-container px-2 py-0.5 rounded-full flex items-center gap-1 font-medium"><Mail size={10}/> Contact</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+        </div>
+      </div>
+      
+      {/* FOOTER */}
+      <div className="mt-8 py-6 border-t border-outline-variant/30 flex flex-col md:flex-row items-center justify-between gap-4 text-xs font-medium text-on-surface-variant">
+        <div className="flex items-center gap-4">
+          <span className="flex items-center gap-1.5"><ShieldCheck size={14} className="text-success"/> EduScheduler Student Portal</span>
+          <span className="hidden md:inline-block border-l border-outline-variant/50 h-3"></span>
+          <span className="hidden md:inline-flex items-center gap-1.5">Read-Only Access</span>
+        </div>
+        <p>© 2025 EduScheduler AI. All rights reserved.</p>
+      </div>
+
     </div>
   );
 }
