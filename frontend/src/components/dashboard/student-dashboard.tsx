@@ -4,7 +4,8 @@ import { useState, useEffect } from 'react';
 import { 
   Calendar, Clock, BookOpen, MapPin, Bell, Play,
   Users, CheckCircle2, ArrowRight, GraduationCap, Building2,
-  CalendarDays
+  CalendarDays, Filter, Search, MonitorPlay, Projector, Beaker,
+  Info, ShieldCheck, LayoutTemplate
 } from 'lucide-react';
 import gsap from 'gsap';
 
@@ -137,6 +138,173 @@ export function StudentDashboard() {
           </div>
         </div>
 
+      </div>
+
+      {/* --- PHASE 2 START --- */}
+      
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 pt-4">
+        
+        {/* LEFT COLUMN: TIMETABLES */}
+        <div className="xl:col-span-2 space-y-8">
+          
+          {/* TODAY'S TIMETABLE */}
+          <div className="bg-surface border border-outline-variant/30 rounded-3xl p-6 md:p-8 shadow-sm">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+              <div>
+                <h3 className="text-xl font-bold text-on-surface flex items-center gap-2"><Calendar size={22} className="text-primary"/> Today's Timetable</h3>
+                <p className="text-sm text-on-surface-variant mt-1">Your schedule for {formatDate(currentTime)}.</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <button className="flex items-center gap-2 bg-surface-container border border-outline-variant/50 px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-outline-variant/20 transition-colors">
+                  <Filter size={16}/> Filter
+                </button>
+              </div>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="border-b border-outline-variant/30 text-xs uppercase tracking-wider text-on-surface-variant">
+                    <th className="pb-3 px-2 font-semibold">Time</th>
+                    <th className="pb-3 px-2 font-semibold">Subject</th>
+                    <th className="pb-3 px-2 font-semibold">Faculty</th>
+                    <th className="pb-3 px-2 font-semibold">Room</th>
+                    <th className="pb-3 px-2 font-semibold">Type</th>
+                    <th className="pb-3 px-2 font-semibold text-right">Status</th>
+                  </tr>
+                </thead>
+                <tbody className="text-sm">
+                  {[
+                    { time: '09:00 - 10:00 AM', sub: 'Software Engineering', fac: 'Prof. Ramesh', room: 'Room 304', type: 'Theory', status: 'Completed', color: 'bg-success/10 text-success' },
+                    { time: '10:00 - 11:00 AM', sub: 'Data Structures', fac: 'Dr. Sharma', room: 'Room 304', type: 'Theory', status: 'Running', color: 'bg-primary/10 text-primary' },
+                    { time: '11:00 - 12:00 PM', sub: 'Database Mgmt', fac: 'Dr. Patel', room: 'Room 305', type: 'Theory', status: 'Upcoming', color: 'bg-secondary/10 text-secondary' },
+                    { time: '01:00 - 03:00 PM', sub: 'DBMS Lab', fac: 'Dr. Patel', room: 'Lab 2', type: 'Practical', status: 'Upcoming', color: 'bg-secondary/10 text-secondary' },
+                  ].map((row, i) => (
+                    <tr key={i} className="border-b border-outline-variant/10 hover:bg-surface-container/30 transition-colors">
+                      <td className="py-4 px-2 font-medium text-on-surface">{row.time}</td>
+                      <td className="py-4 px-2 text-on-surface font-bold">{row.sub}</td>
+                      <td className="py-4 px-2 text-on-surface-variant">{row.fac}</td>
+                      <td className="py-4 px-2 text-on-surface-variant">{row.room}</td>
+                      <td className="py-4 px-2">
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase ${row.type === 'Practical' ? 'bg-tertiary/10 text-tertiary border border-tertiary/20' : 'bg-surface-container text-on-surface-variant border border-outline-variant/30'}`}>
+                          {row.type}
+                        </span>
+                      </td>
+                      <td className="py-4 px-2 text-right">
+                        <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${row.color}`}>
+                          {row.status}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* WEEKLY TIMETABLE OVERVIEW */}
+          <div className="bg-surface border border-outline-variant/30 rounded-3xl p-6 md:p-8 shadow-sm">
+             <div className="flex items-center justify-between mb-6">
+                <h3 className="text-xl font-bold text-on-surface flex items-center gap-2"><LayoutTemplate size={22} className="text-tertiary"/> Weekly Timetable</h3>
+                <button className="text-xs bg-surface-container border border-outline-variant px-3 py-1.5 rounded-lg font-medium hover:bg-outline-variant/20 transition-colors">
+                  View Full Week
+                </button>
+             </div>
+             
+             <div className="bg-surface-container-lowest border border-outline-variant/30 rounded-2xl p-8 flex flex-col items-center justify-center text-center">
+               <div className="w-16 h-16 bg-surface-container rounded-full flex items-center justify-center mb-4 text-on-surface-variant border border-outline-variant/50">
+                 <CalendarDays size={24}/>
+               </div>
+               <p className="text-sm font-bold text-on-surface mb-2">Interactive Weekly View</p>
+               <p className="text-xs text-on-surface-variant max-w-sm mb-4">You have read-only access to view the complete weekly matrix for Division A, Batch A1.</p>
+               <button className="bg-primary text-on-primary px-5 py-2 rounded-xl text-sm font-bold hover:bg-primary/90 transition-colors shadow-md shadow-primary/20">
+                 Open Weekly Timetable
+               </button>
+             </div>
+          </div>
+
+        </div>
+
+        {/* RIGHT COLUMN: CLASSROOM & LAB DETAILS */}
+        <div className="space-y-8">
+          
+          {/* CLASSROOM DETAILS */}
+          <div className="bg-surface border border-outline-variant/30 rounded-3xl p-6 shadow-sm relative overflow-hidden">
+            <div className="absolute top-0 right-0 p-4 opacity-5 text-secondary">
+              <Building2 size={100} />
+            </div>
+            
+            <div className="relative z-10">
+              <h3 className="text-xl font-bold text-on-surface flex items-center gap-2 mb-6"><MapPin size={22} className="text-secondary"/> Classroom Details</h3>
+              
+              <div className="bg-secondary/10 border border-secondary/20 p-5 rounded-2xl mb-6">
+                <div className="flex justify-between items-start mb-2">
+                  <div>
+                    <p className="text-xs font-bold text-secondary uppercase tracking-wider">Currently Assigned</p>
+                    <p className="text-2xl font-bold text-on-surface mt-1">Room 304</p>
+                  </div>
+                  <span className="bg-success text-white text-[10px] font-bold px-2 py-1 rounded-md uppercase">Occupied</span>
+                </div>
+                <p className="text-sm text-on-surface-variant">Main Building, 3rd Floor</p>
+              </div>
+
+              <div className="space-y-3 mb-6">
+                 <div className="flex justify-between items-center p-3 border border-outline-variant/30 rounded-xl bg-surface-container/30">
+                   <span className="text-sm text-on-surface-variant flex items-center gap-2"><Users size={16}/> Capacity</span>
+                   <span className="text-sm font-bold text-on-surface">60 Students</span>
+                 </div>
+                 <div className="flex justify-between items-center p-3 border border-outline-variant/30 rounded-xl bg-surface-container/30">
+                   <span className="text-sm text-on-surface-variant flex items-center gap-2"><MonitorPlay size={16}/> Smart Board</span>
+                   <span className="text-sm font-bold text-success flex items-center gap-1"><CheckCircle2 size={14}/> Available</span>
+                 </div>
+                 <div className="flex justify-between items-center p-3 border border-outline-variant/30 rounded-xl bg-surface-container/30">
+                   <span className="text-sm text-on-surface-variant flex items-center gap-2"><Projector size={16}/> Projector</span>
+                   <span className="text-sm font-bold text-success flex items-center gap-1"><CheckCircle2 size={14}/> Available</span>
+                 </div>
+              </div>
+
+              <div className="p-3 bg-surface-container border border-outline-variant/50 rounded-xl flex gap-3 text-xs text-on-surface-variant">
+                <Info size={16} className="text-primary flex-shrink-0"/>
+                <p>Students cannot reserve or modify classrooms. Please contact your department admin for room changes.</p>
+              </div>
+            </div>
+          </div>
+
+          {/* LABORATORY DETAILS */}
+          <div className="bg-surface border border-outline-variant/30 rounded-3xl p-6 shadow-sm">
+            <h3 className="text-xl font-bold text-on-surface flex items-center gap-2 mb-6"><Beaker size={22} className="text-tertiary"/> Laboratory Details</h3>
+            
+            <div className="space-y-4">
+               {[
+                 { name: 'DBMS Lab (Lab 2)', floor: '2nd Floor, IT Block', equip: '60 High-Perf PCs, Oracle 19c', time: 'Today 01:00 PM' },
+               ].map((lab, i) => (
+                 <div key={i} className="p-4 border border-outline-variant/50 rounded-2xl bg-surface-container/30">
+                   <div className="flex items-center gap-3 mb-3">
+                     <div className="w-10 h-10 rounded-xl bg-tertiary/10 flex items-center justify-center text-tertiary">
+                       <Beaker size={20}/>
+                     </div>
+                     <div>
+                       <p className="font-bold text-sm text-on-surface">{lab.name}</p>
+                       <p className="text-xs text-on-surface-variant">{lab.floor}</p>
+                     </div>
+                   </div>
+                   <div className="space-y-2 mt-4 pt-4 border-t border-outline-variant/30">
+                     <div className="flex justify-between text-xs">
+                       <span className="text-on-surface-variant">Equipment</span>
+                       <span className="font-bold text-on-surface text-right max-w-[140px] truncate">{lab.equip}</span>
+                     </div>
+                     <div className="flex justify-between text-xs">
+                       <span className="text-on-surface-variant">Next Practical</span>
+                       <span className="font-bold text-tertiary">{lab.time}</span>
+                     </div>
+                   </div>
+                 </div>
+               ))}
+            </div>
+            
+          </div>
+
+        </div>
       </div>
     </div>
   );
