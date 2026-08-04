@@ -42,12 +42,9 @@ export default function AttendancePage() {
       formData.append('slot_id', slotId);
       formData.append('date', date);
 
-      const token = localStorage.getItem('access_token');
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1'}/attendance/upload`, {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        },
+        credentials: 'include',
         body: formData,
       });
 
@@ -69,11 +66,8 @@ export default function AttendancePage() {
   const handleExport = async () => {
     if (!slotId || !date) return;
     try {
-      const token = localStorage.getItem('access_token');
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1'}/attendance/export/${slotId}?date=${date}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+        credentials: 'include',
       });
       
       if (!response.ok) throw new Error("Export failed");

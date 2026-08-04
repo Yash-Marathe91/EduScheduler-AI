@@ -21,3 +21,4 @@ python-multipart
 langchain-google-genai
 passlib[bcrypt]
 PyJWT
+slowapi

@@ -2,14 +2,17 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/contexts/auth-context';
 import { Mail, Lock, ShieldCheck, ArrowRight, CheckCircle2, Loader2 } from 'lucide-react';
 import gsap from 'gsap';
 import { useEffect } from 'react';
 
 export default function LoginPage() {
   const router = useRouter();
+  const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [role, setRole] = useState('faculty');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -30,7 +33,8 @@ export default function LoginPage() {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+        credentials: 'include',
+        body: JSON.stringify({ email, password, role }),
       });
 
       const data = await response.json();
@@ -39,15 +43,8 @@ export default function LoginPage() {
         throw new Error(data.detail || 'Invalid email or password');
       }
 
-      // Store token & role securely (for demo, using localStorage)
-      localStorage.setItem('token', data.access_token);
-      localStorage.setItem('userRole', data.role);
-      
-      // Temporary: also set our localRole flag in localStorage if you want the dashboard page to pick it up immediately
-      localStorage.setItem('localRole', data.role);
-
-      // Redirect to dashboard
-      router.push('/dashboard');
+      // Use AuthContext to set state and redirect
+      login(data.role);
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -77,7 +74,7 @@ export default function LoginPage() {
             for education.
           </h2>
           
-          <p className="text-on-surface-variant text-lg max-w-md mb-12">
+          <p className="text-on-surface-variant text-lg max-w-[448px] mb-12">
             Log in to access your AI-powered timetable, manage institutional resources, and monitor operational health in real-time.
           </p>
 
@@ -97,7 +94,7 @@ export default function LoginPage() {
 
       {/* RIGHT SIDE - LOGIN FORM */}
       <div className="md:w-1/2 bg-surface p-8 md:p-16 lg:p-24 flex items-center justify-center relative">
-        <div className="w-full max-w-md login-fade-in">
+        <div className="w-full max-w-[448px] login-fade-in">
           
           <div className="mb-10 text-center md:text-left">
             <h3 className="text-3xl font-display font-bold text-on-surface mb-2 tracking-tight">Welcome back</h3>
@@ -111,6 +108,26 @@ export default function LoginPage() {
                 {error}
               </div>
             )}
+
+            <div className="space-y-3">
+              <label className="text-xs font-bold text-on-surface uppercase tracking-wider">Select Role</label>
+              <div className="grid grid-cols-3 gap-3">
+                {['admin', 'faculty', 'student'].map((r) => (
+                  <button
+                    key={r}
+                    type="button"
+                    onClick={() => setRole(r)}
+                    className={`py-3 rounded-xl text-sm font-bold capitalize transition-all border-2 ${
+                      role === r 
+                        ? 'bg-primary/10 border-primary text-primary shadow-[0_4px_12px_rgba(var(--color-primary),0.15)]' 
+                        : 'bg-surface-container/30 border-outline-variant/30 text-on-surface-variant hover:border-primary/40 hover:bg-surface-container/80'
+                    }`}
+                  >
+                    {r}
+                  </button>
+                ))}
+              </div>
+            </div>
 
             <div className="space-y-2">
               <label className="text-xs font-bold text-on-surface uppercase tracking-wider">Email Address</label>

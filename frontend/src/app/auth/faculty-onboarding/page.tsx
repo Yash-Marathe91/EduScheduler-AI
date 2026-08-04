@@ -30,23 +30,14 @@ export default function FacultyOnboardingPage() {
     setIsScanning(true);
     
     try {
-      // 1. Get current session token for backend auth
-      const supabase = createBrowserClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-      );
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      // 2. Prepare file
+      // 1. Prepare file
       const formData = new FormData();
       formData.append("file", file);
 
-      // 3. Send to FastAPI backend OCR endpoint
-      const response = await fetch("http://localhost:8000/api/v1/faculty/parse-id", {
+      // 2. Send to FastAPI backend OCR endpoint
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/faculty/parse-id`, {
         method: "POST",
-        headers: {
-          "Authorization": `Bearer ${session?.access_token}`
-        },
+        credentials: "include",
         body: formData,
       });
 
@@ -93,7 +84,7 @@ export default function FacultyOnboardingPage() {
         <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-secondary/10 blur-[100px] rounded-full"></div>
       </div>
 
-      <Card className="w-full max-w-xl z-10 border-outline-variant/30 shadow-xl bg-surface/80 backdrop-blur-md">
+      <Card className="w-full max-w-[576px] z-10 border-outline-variant/30 shadow-xl bg-surface/80 backdrop-blur-md">
         <CardHeader className="text-center pb-2">
           <div className="mx-auto bg-primary/10 w-16 h-16 rounded-full flex items-center justify-center mb-4">
             <Sparkles className="w-8 h-8 text-primary" />

@@ -155,11 +155,8 @@ export default function TimetablePage() {
 
   const handleExport = async () => {
     try {
-      const token = localStorage.getItem('access_token');
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1'}/timetable/export`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+        credentials: 'include',
       });
       
       if (!response.ok) throw new Error("Export failed");
